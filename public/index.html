@@ -7,20 +7,20 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
-  --bg:#0e1116;
-  --bg-2:#151922;
-  --card:#191e28;
-  --card-soft:#222837;
+  --bg:#090b0f;
+  --bg-2:#10141b;
+  --card:#151922;
+  --card-soft:#202633;
   --text:#f8fafc;
-  --muted:#9aa3b2;
-  --line:rgba(255,255,255,.10);
-  --line-strong:rgba(255,255,255,.16);
-  --accent:#70b7ff;
-  --accent-2:#55d8bd;
+  --muted:#9ca5b4;
+  --line:rgba(255,255,255,.095);
+  --line-strong:rgba(255,255,255,.18);
+  --accent:#8bc7ff;
+  --accent-2:#5ddbc4;
   --danger:#ff6b7a;
   --warning:#f5c66d;
   --success:#64d99f;
-  --shadow:0 18px 44px rgba(0,0,0,.32);
+  --shadow:0 20px 56px rgba(0,0,0,.34);
   --radius:22px;
 }
 
@@ -30,9 +30,8 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   background:
-    radial-gradient(circle at 22% -8%, rgba(112,183,255,.18), transparent 32%),
-    radial-gradient(circle at 88% 10%, rgba(85,216,189,.12), transparent 28%),
-    linear-gradient(180deg,var(--bg),#12161d 52%,#171b22);
+    radial-gradient(circle at 26% -12%, rgba(139,199,255,.16), transparent 31%),
+    linear-gradient(180deg,var(--bg),#11161e 48%,#0d1117 100%);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
@@ -55,8 +54,8 @@ textarea{ resize:vertical; min-height:92px; }
   position:sticky;
   top:0;
   z-index:20;
-  padding:max(14px,env(safe-area-inset-top)) 16px 12px;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 98%,transparent),color-mix(in srgb,var(--bg) 86%,transparent));
+  padding:max(14px,env(safe-area-inset-top)) 18px 13px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 99%,transparent),color-mix(in srgb,var(--bg) 88%,transparent));
   backdrop-filter:blur(18px);
   border-bottom:1px solid var(--line);
 }
@@ -72,8 +71,8 @@ textarea{ resize:vertical; min-height:92px; }
 .brand-title{
   min-width:0;
   font-weight:900;
-  letter-spacing:.02em;
-  font-size:17px;
+  letter-spacing:.01em;
+  font-size:18px;
 }
 
 .brand-sub{
@@ -100,16 +99,23 @@ textarea{ resize:vertical; min-height:92px; }
 
 .screen{
   flex:1;
-  padding:16px 16px calc(92px + env(safe-area-inset-bottom));
+  padding:18px 18px calc(96px + env(safe-area-inset-bottom));
   display:none;
 }
 
 .screen.active{ display:block; }
+.screen[data-screen="0"].active{
+  min-height:calc(100dvh - 138px);
+  display:grid;
+  align-items:center;
+}
 
 .stack{ display:grid; gap:14px; }
 
 .panel{
-  background:var(--card);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+    var(--card);
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
@@ -123,10 +129,10 @@ textarea{ resize:vertical; min-height:92px; }
 }
 
 .type-card{
-  min-height:132px;
+  min-height:154px;
   text-align:left;
-  border-radius:24px;
-  padding:20px;
+  border-radius:28px;
+  padding:24px;
   border:1px solid var(--line-strong);
   background:
     linear-gradient(135deg, rgba(255,255,255,.055), transparent 42%),
@@ -140,7 +146,7 @@ textarea{ resize:vertical; min-height:92px; }
 }
 
 .type-name{
-  font-size:30px;
+  font-size:34px;
   font-weight:900;
   line-height:1.08;
 }
@@ -153,7 +159,7 @@ textarea{ resize:vertical; min-height:92px; }
 }
 
 .section-title{
-  margin:0 0 10px;
+  margin:0 0 14px;
   font-size:28px;
   line-height:1.12;
   font-weight:900;
@@ -281,13 +287,20 @@ input[type="date"]{
   font-weight:900;
 }
 
+.departments-list{
+  display:grid;
+  gap:12px;
+}
+
 .dept-card{
   border:1px solid var(--line);
-  border-radius:18px;
-  background:var(--card);
-  padding:14px;
+  border-radius:22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), transparent),
+    var(--card);
+  padding:15px;
   display:grid;
-  gap:10px;
+  gap:12px;
 }
 
 .dept-top{
@@ -298,6 +311,7 @@ input[type="date"]{
 }
 
 .dept-name{
+  font-size:16px;
   font-weight:900;
   letter-spacing:.04em;
 }
@@ -310,43 +324,64 @@ input[type="date"]{
 
 .status-row{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:6px;
+  padding:4px;
+  border-radius:17px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line);
+}
+
+.status-row.has-na{
+  grid-template-columns:repeat(3, minmax(0,1fr));
 }
 
 .status-btn{
-  min-height:42px;
+  min-height:48px;
   border-radius:13px;
-  padding:8px 9px;
-  background:var(--card-soft);
-  border:1px solid var(--line);
-  font-size:13px;
+  padding:8px 7px;
+  background:transparent;
+  border:1px solid transparent;
+  font-size:12px;
   font-weight:800;
+  line-height:1.15;
+  text-align:center;
+}
+.status-btn[data-status="na"]{
+  grid-column:1 / -1;
+  min-height:42px;
+  color:var(--muted);
+  background:rgba(255,255,255,.025);
+  border-color:var(--line);
 }
 .status-btn.active[data-status="ok"]{ border-color:var(--success); color:var(--success); }
 .status-btn.active[data-status="warning"]{ border-color:var(--warning); color:var(--warning); }
 .status-btn.active[data-status="critical"]{ border-color:var(--danger); color:var(--danger); }
 .status-btn.active[data-status="na"]{ border-color:var(--muted); color:var(--muted); }
 
-.photo-drop{
-  position:relative;
+.photo-actions{
+  display:grid;
+  gap:10px;
+}
+
+.photo-pick-btn{
+  width:100%;
   border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));
   border-radius:22px;
   background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--card)),color-mix(in srgb,var(--accent-2) 10%,var(--card)));
-  padding:22px 18px;
+  padding:20px 18px;
   text-align:center;
-  overflow:hidden;
-}
-
-.photo-drop input{
-  position:absolute;
-  inset:0;
-  opacity:0;
-}
-
-.photo-title{
   font-weight:900;
   font-size:22px;
+}
+
+.photo-input{
+  position:fixed;
+  inline-size:1px;
+  block-size:1px;
+  opacity:0;
+  pointer-events:none;
+  clip-path:inset(50%);
 }
 
 .photo-grid{
@@ -368,10 +403,11 @@ input[type="date"]{
   width:100%;
   text-align:left;
   border-radius:18px;
-  padding:15px;
+  padding:17px 16px;
   background:var(--card-soft);
   border:1px solid var(--line);
   font-weight:900;
+  text-align:center;
 }
 .skip-photo.active{
   border-color:var(--accent-2);
@@ -492,7 +528,8 @@ body.input-focused .bar{
 .hidden{ display:none !important; }
 
 @media (max-width:370px){
-  .choice-grid,.status-row{ grid-template-columns:1fr; }
+  .choice-grid{ grid-template-columns:1fr; }
+  .status-row{ grid-template-columns:repeat(3, minmax(0,1fr)); }
   .photo-grid{ grid-template-columns:repeat(2,1fr); }
 }
 </style>
@@ -592,11 +629,11 @@ body.input-focused .bar{
         <div class="panel">
           <h2 class="section-title">Фотоотчёт</h2>
           <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их позже.</p>
-          <label class="photo-drop">
-            <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
-            <div class="photo-title">Выбрать фотографии</div>
-          </label>
-          <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии позже</button>
+          <div class="photo-actions">
+            <button class="photo-pick-btn" id="photoPickBtn" type="button">Выбрать фотографии</button>
+            <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии позже</button>
+          </div>
+          <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
         </div>
         <div class="panel">
           <h2 class="section-title" id="photoCount">Фото: 0</h2>
@@ -652,6 +689,7 @@ const reviewEl = document.getElementById('review');
 const photoInput = document.getElementById('photoInput');
 const photoGrid = document.getElementById('photoGrid');
 const photoCount = document.getElementById('photoCount');
+const photoPickBtn = document.getElementById('photoPickBtn');
 const loftSelect = document.getElementById('loftSelect');
 const hallSearch = document.getElementById('hallSearch');
 const hallList = document.getElementById('hallList');
@@ -690,7 +728,7 @@ const statusOptions = [
   ['ok','🟢 Без замечаний'],
   ['warning','🟡 Есть замечания'],
   ['critical','🔴 Серьёзные замечания'],
-  ['na','Не применимо']
+  ['na','Не было на мероприятии']
 ];
 const departmentHints = {
   SALES:'Заполняйте при наличии замечаний к подготовке мероприятия отделом продаж. Укажите недочёты в ТЗ, схеме, таймингах, передаче информации или коммуникации.',
@@ -890,10 +928,12 @@ function renderFormats(){
 }
 
 function renderDepartments(){
+  departmentsEl.className = 'departments-list';
   departmentsEl.innerHTML = ALL_DEPARTMENTS.map(name => {
     const entry = state.departments[name] || { status:'', comment:'' };
+    const isOptional = OPTIONAL_DEPARTMENTS.includes(name);
     const options = statusOptions
-      .filter(([status]) => status !== 'na' || OPTIONAL_DEPARTMENTS.includes(name))
+      .filter(([status]) => status !== 'na' || isOptional)
       .map(([status,label]) => `<button class="status-btn ${entry.status === status ? 'active' : ''}" data-department="${name}" data-status="${status}" type="button">${label}</button>`)
       .join('');
     const needsComment = entry.status === 'warning' || entry.status === 'critical';
@@ -901,7 +941,7 @@ function renderDepartments(){
       <div class="dept-card">
         <div class="dept-top"><div class="dept-name">${name}</div></div>
         <div class="hint">${departmentHints[name]}</div>
-        <div class="status-row">${options}</div>
+        <div class="status-row ${isOptional ? 'has-na' : ''}">${options}</div>
         <textarea class="textarea ${needsComment ? '' : 'hidden'}" data-department-comment="${name}" placeholder="Опишите конкретно, что произошло">${escapeHtml(entry.comment)}</textarea>
       </div>
     `;
@@ -912,6 +952,7 @@ function renderPhotos(){
   photoCount.textContent = `Фото: ${photos.length}`;
   photosLaterBtn.classList.toggle('active', state.photosLater);
   photoInput.disabled = state.photosLater;
+  photoPickBtn.disabled = state.photosLater;
   photoGrid.innerHTML = photos.map((photo, index) => `
     <div class="photo">
       <img src="${photo.preview}" alt="Фото ${index + 1}">
@@ -924,7 +965,7 @@ function renderReview(){
   const payload = buildPayload();
   const rows = [];
   if (state.type === 'event') {
-    rows.push(['Дата', payload.event.date], ['Залы', payload.event.hall], ['Мероприятие', payload.event.eventName], ['Тип', payload.event.eventType], ['Формат', joinList(payload.event.formats)], ['Гостей', payload.event.guestCount], ['ОП', payload.event.opManager], ['ОР', payload.event.orManager]);
+    rows.push(['Дата', payload.event.date], ['Лофт', payload.event.loft], ['Залы', payload.event.hall], ['Мероприятие', payload.event.eventName], ['Тип', payload.event.eventType], ['Формат', joinList(payload.event.formats)], ['Гостей', payload.event.guestCount], ['ОП', payload.event.opManager], ['ОР', payload.event.orManager]);
     const withIssues = ALL_DEPARTMENTS.filter(name => ['warning','critical'].includes(payload.departments[name]?.status));
     const ok = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'ok');
     const na = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'na');
@@ -1059,17 +1100,31 @@ async function compressImage(file){
   if (!['image/jpeg','image/png','image/webp'].includes(file.type)) return file;
   const bitmap = await createImageBitmap(file).catch(() => null);
   if (!bitmap) return file;
-  const maxSide = 2560;
+  const maxSide = 1920;
   const ratio = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  if (ratio === 1 && file.size < 3.5 * 1024 * 1024) return file;
+  if (ratio === 1 && file.size < 1.8 * 1024 * 1024) return file;
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(bitmap.width * ratio);
   canvas.height = Math.round(bitmap.height * ratio);
   const ctx = canvas.getContext('2d');
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.82));
   if (!blob || blob.size >= file.size) return file;
   return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type:'image/jpeg' });
+}
+
+async function mapWithConcurrency(items, limit, mapper){
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workers = Array.from({ length:Math.min(limit, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const current = nextIndex;
+      nextIndex += 1;
+      results[current] = await mapper(items[current], current);
+    }
+  });
+  await Promise.all(workers);
+  return results;
 }
 
 async function addPhotos(fileList){
@@ -1081,13 +1136,24 @@ async function addPhotos(fileList){
   clearError();
   state.photosLater = false;
   saveDraft();
-  for (const file of incoming) {
-    if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name) && !['image/jpeg','image/png','image/webp','image/heic','image/heif'].includes(file.type)) {
-      showError('Фото должны быть в формате jpg, jpeg, png, webp, heic или heif.');
-      continue;
+  photoPickBtn.disabled = true;
+  photoPickBtn.textContent = 'Готовим фото...';
+  try {
+    const validFiles = [];
+    for (const file of incoming) {
+      if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name) && !['image/jpeg','image/png','image/webp','image/heic','image/heif'].includes(file.type)) {
+        showError('Фото должны быть в формате jpg, jpeg, png, webp, heic или heif.');
+        continue;
+      }
+      validFiles.push(file);
     }
-    const processed = await compressImage(file);
-    photos.push({ file:processed, preview:URL.createObjectURL(processed) });
+    const processedFiles = await mapWithConcurrency(validFiles, 3, compressImage);
+    processedFiles.forEach(file => {
+      photos.push({ file, preview:URL.createObjectURL(file) });
+    });
+  } finally {
+    photoPickBtn.disabled = false;
+    photoPickBtn.textContent = 'Выбрать фотографии';
   }
   renderPhotos();
 }
@@ -1215,6 +1281,10 @@ departmentsEl.addEventListener('input', event => {
 photoInput.addEventListener('change', event => {
   addPhotos(event.target.files);
   photoInput.value = '';
+});
+
+photoPickBtn.addEventListener('click', () => {
+  if (!state.photosLater) photoInput.click();
 });
 
 photoGrid.addEventListener('click', event => {

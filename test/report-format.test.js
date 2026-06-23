@@ -7,6 +7,7 @@ const eventPayload = {
   type: 'event',
   event: {
     date: '2026-06-11',
+    loft: 'LOFT#3',
     hall: 'Grace',
     eventType: 'Свадьба',
     eventName: 'Свадьба Александра и Марины',
@@ -46,6 +47,7 @@ test('formats event report for Telegram', () => {
       'LOFT HALL · ОТЧЁТ ПО МЕРОПРИЯТИЮ',
       '',
       'Дата: 11.06.2026',
+      'Лофт: LOFT#3',
       'Зал: Grace',
       'Мероприятие: Свадьба Александра и Марины',
       'Тип: Свадьба',

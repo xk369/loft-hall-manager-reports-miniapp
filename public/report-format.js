@@ -74,6 +74,7 @@ export function formatEventReport(payload, photoCount = 0) {
     'LOFT HALL · ОТЧЁТ ПО МЕРОПРИЯТИЮ',
     '',
     `Дата: ${formatDate(event.date)}`,
+    `Лофт: ${cleanText(event.loft)}`,
     `Зал: ${cleanText(event.hall) || joinList(event.halls)}`,
     `Мероприятие: ${cleanText(event.eventName)}`,
     `Тип: ${cleanText(event.eventType)}`,
