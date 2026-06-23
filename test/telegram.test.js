@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
-import { TelegramAuthError, validateTelegramInitData } from '../src/telegram.js';
+import { TelegramAuthError, sendPhotosBeforeReport, validateTelegramInitData } from '../src/telegram.js';
 
 const BOT_TOKEN = '123456789:TEST_TOKEN_FOR_UNIT_TESTS_ONLY';
 
@@ -55,4 +55,39 @@ test('rejects tampered Telegram initData', () => {
       }),
     TelegramAuthError
   );
+});
+
+test('continues photo delivery after a failed media group when requested', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (_url, options) => {
+    calls.push(options);
+    const ok = calls.length === 1;
+    return new Response(
+      JSON.stringify(ok ? { ok: true, result: [{ message_id: 1 }] } : { ok: false, description: 'Bad Request: failed batch' }),
+      { status: ok ? 200 : 400, headers: { 'content-type': 'application/json' } }
+    );
+  };
+
+  try {
+    const photos = Array.from({ length: 12 }, (_, index) => ({
+      buffer: Buffer.from(`photo-${index}`),
+      mimeType: 'image/jpeg',
+      filename: `photo-${index}.jpg`
+    }));
+
+    const result = await sendPhotosBeforeReport({
+      botToken: BOT_TOKEN,
+      chatId: '-1001',
+      photos,
+      continueOnError: true,
+      batchDelayMs: 0
+    });
+
+    assert.equal(calls.length, 2);
+    assert.equal(result.sentCount, 10);
+    assert.equal(result.failedBatches.length, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

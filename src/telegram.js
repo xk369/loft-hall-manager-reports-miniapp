@@ -79,7 +79,11 @@ export function validateTelegramInitData({
   };
 }
 
-async function callTelegram({ botToken, method, body }) {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function callTelegram({ botToken, method, body, retries = 2 }) {
   const response = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
     method: 'POST',
     body
@@ -90,6 +94,14 @@ async function callTelegram({ botToken, method, body }) {
     payload = await response.json();
   } catch {
     // Keep the Telegram status as the useful diagnostic.
+  }
+
+  if ((!response.ok || !payload?.ok) && retries > 0) {
+    const retryAfterSeconds = Number(payload?.parameters?.retry_after || 0);
+    if (response.status === 429 || retryAfterSeconds > 0) {
+      await sleep(Math.max(900, retryAfterSeconds * 1000));
+      return callTelegram({ botToken, method, body, retries: retries - 1 });
+    }
   }
 
   if (!response.ok || !payload?.ok) {
@@ -127,21 +139,57 @@ export async function sendTelegramMediaGroup({ botToken, chatId, photos }) {
   return callTelegram({ botToken, method: 'sendMediaGroup', body: form });
 }
 
-export async function sendPhotosBeforeReport({ botToken, chatId, photos }) {
+export async function sendPhotosBeforeReport({
+  botToken,
+  chatId,
+  photos,
+  continueOnError = false,
+  batchDelayMs = 700
+}) {
   if (!Array.isArray(photos) || photos.length === 0) {
     throw new Error('Добавьте хотя бы одно фото.');
   }
 
+  const result = {
+    attemptedCount: photos.length,
+    sentCount: 0,
+    failedBatches: []
+  };
+
   if (photos.length === 1) {
-    await sendTelegramPhoto({ botToken, chatId, photo: photos[0] });
-    return;
+    try {
+      await sendTelegramPhoto({ botToken, chatId, photo: photos[0] });
+      result.sentCount = 1;
+      return result;
+    } catch (error) {
+      if (!continueOnError) throw error;
+      result.failedBatches.push({ from: 0, to: 0, error: error.message });
+      return result;
+    }
   }
 
   for (let index = 0; index < photos.length; index += 10) {
-    await sendTelegramMediaGroup({
-      botToken,
-      chatId,
-      photos: photos.slice(index, index + 10)
-    });
+    const batch = photos.slice(index, index + 10);
+    try {
+      await sendTelegramMediaGroup({
+        botToken,
+        chatId,
+        photos: batch
+      });
+      result.sentCount += batch.length;
+    } catch (error) {
+      if (!continueOnError) throw error;
+      result.failedBatches.push({
+        from: index,
+        to: index + batch.length - 1,
+        error: error.message
+      });
+    }
+
+    if (index + 10 < photos.length && batchDelayMs > 0) {
+      await sleep(batchDelayMs);
+    }
   }
+
+  return result;
 }

@@ -105,15 +105,18 @@ app.post('/api/reports', async (request, response) => {
     const telegram = validateRequestInitData(fields.initData);
     const payload = parseReportPayload(fields.reportPayload);
     const photos = validatePhotos(files, payload);
-    const reportText = normalizeReportText(buildReportText(payload, photos.length));
+    normalizeReportText(buildReportText(payload, photos.length));
 
+    let photoDelivery = { sentCount: 0, failedBatches: [] };
     if (photos.length > 0) {
-      await sendPhotosBeforeReport({
+      photoDelivery = await sendPhotosBeforeReport({
         botToken: config.botToken,
         chatId: config.eventReportsChatId,
-        photos
+        photos,
+        continueOnError: true
       });
     }
+    const reportText = normalizeReportText(buildReportText(payload, photoDelivery.sentCount));
     const message = await sendTelegramMessage({
       botToken: config.botToken,
       chatId: config.eventReportsChatId,
@@ -127,11 +130,19 @@ app.post('/api/reports', async (request, response) => {
         telegramUserId: telegram.user.id,
         telegramMessageId: message.message_id,
         photos: photos.length,
+        sentPhotos: photoDelivery.sentCount,
+        failedPhotoBatches: photoDelivery.failedBatches.length,
         timestamp: new Date().toISOString()
       })
     );
 
-    response.json({ ok: true, messageId: message.message_id, photoCount: photos.length });
+    response.json({
+      ok: true,
+      messageId: message.message_id,
+      photoCount: photoDelivery.sentCount,
+      requestedPhotoCount: photos.length,
+      photoWarnings: photoDelivery.failedBatches
+    });
   } catch (error) {
     if (error instanceof TelegramAuthError) {
       response.status(401).json({ ok: false, error: error.message, code: error.code });

@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>LOFT HALL · Отчёты менеджеров</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -29,7 +29,7 @@
   --radius:18px;
 }
 
-*{ box-sizing:border-box; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body{ min-height:100%; }
 body{
   margin:0;
@@ -41,9 +41,11 @@ body{
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
+  touch-action:manipulation;
+  -webkit-text-size-adjust:100%;
 }
 
-button,input,select,textarea{ font:inherit; }
+button,input,select,textarea{ font:inherit; touch-action:manipulation; }
 button{ border:0; color:inherit; }
 textarea{ resize:vertical; min-height:92px; }
 .textarea.compact{ min-height:108px; }
@@ -625,9 +627,14 @@ body.input-focused .bar{
 
 .hidden{ display:none !important; }
 
+@media (max-width:430px){
+  .status-row.has-na{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
 @media (max-width:370px){
   .choice-grid{ grid-template-columns:1fr; }
   .status-row{ grid-template-columns:repeat(3, minmax(0,1fr)); }
+  .status-row.has-na{ grid-template-columns:repeat(2, minmax(0,1fr)); }
   .photo-grid{ grid-template-columns:repeat(2,1fr); }
 }
 </style>
@@ -682,7 +689,7 @@ body.input-focused .bar{
           <h2 class="section-title">Данные мероприятия</h2>
           <div class="field" data-field="event.date"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"><div class="field-error"></div></div>
           <div class="field"><label class="label">Лофт</label><select class="select" id="loftSelect"></select></div>
-          <div class="field" data-field="event.halls"><label class="label">Залы</label><div class="selected-line" id="selectedHalls"></div><input class="input" id="hallSearch" placeholder="Поиск по списку залов"><div class="hall-list" id="hallList"></div><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="event.halls"><label class="label">Залы</label><div class="selected-line" id="selectedHalls"></div><div class="hall-list" id="hallList"></div><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventType"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"><div class="field-error"></div></div>
           <div class="field" data-field="event.guestCount"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"><div class="field-error"></div></div>
@@ -700,7 +707,7 @@ body.input-focused .bar{
           <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.eventDate"><label class="label">Дата мероприятия</label><input class="input" type="date" data-bind="tasting.eventDate"><div class="field-error"></div></div>
-          <div class="field" data-field="tasting.eventHall"><label class="label">Зал мероприятия</label><input class="input" data-bind="tasting.eventHall" placeholder="Например: GRACE"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.eventHall"><label class="label">Зал мероприятия</label><select class="select" id="tastingHallSelect" data-bind="tasting.eventHall"></select><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
           <div id="tastingPhotoMount"></div>
         </div>
@@ -799,10 +806,10 @@ const photoSection = document.getElementById('photoSection');
 const eventPhotoMount = document.getElementById('eventPhotoMount');
 const tastingPhotoMount = document.getElementById('tastingPhotoMount');
 const loftSelect = document.getElementById('loftSelect');
-const hallSearch = document.getElementById('hallSearch');
 const hallList = document.getElementById('hallList');
 const selectedHalls = document.getElementById('selectedHalls');
 const customHall = document.getElementById('customHall');
+const tastingHallSelect = document.getElementById('tastingHallSelect');
 const eventType = document.getElementById('eventType');
 const contactType = document.getElementById('contactType');
 const customEventType = document.getElementById('customEventType');
@@ -828,6 +835,10 @@ const lofts = {
   'Вишневый сад':['CHEKHOV HALL','LEVITAN HALL'],
   'Другое':[]
 };
+const allHalls = [...new Set(Object.entries(lofts)
+  .filter(([loft]) => loft !== 'Другое')
+  .flatMap(([, halls]) => halls))]
+  .sort((a,b) => a.localeCompare(b, 'ru'));
 
 const eventTypes = ['Свадьба','Корпоратив','День рождения','Выпускной','Конференция','Деловое мероприятие','Другое'];
 const formats = ['Банкет','Фуршет','Кофе-брейк','Выездной кейтеринг','Другое'];
@@ -996,6 +1007,7 @@ function renderSelects(){
   loftSelect.innerHTML = Object.keys(lofts).map(name => `<option ${state.event.loft === name ? 'selected' : ''}>${name}</option>`).join('');
   eventType.innerHTML = `<option value="">Выберите тип</option>${eventTypes.map(name => `<option ${state.event.eventType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
   contactType.innerHTML = `<option value="">Выберите контакт</option>${contactTypes.map(name => `<option ${state.event.contactType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
+  tastingHallSelect.innerHTML = `<option value="">Выберите зал</option>${allHalls.map(name => `<option value="${escapeHtml(name)}" ${state.tasting.eventHall === name ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}`;
 }
 
 function renderBoundFields(){
@@ -1015,7 +1027,6 @@ function renderBoundFields(){
   customContactType.classList.add('hidden');
   customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
   customHall.classList.toggle('hidden', state.event.loft !== 'Другое');
-  hallSearch.classList.toggle('hidden', state.event.loft === 'Другое');
 }
 
 function renderTypes(){
@@ -1026,12 +1037,10 @@ function renderTypes(){
 
 function renderHalls(){
   const halls = [...(lofts[state.event.loft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
-  const query = hallSearch.value.trim().toLowerCase();
   const selected = getSelectedHalls();
   hallList.classList.toggle('hidden', state.event.loft === 'Другое');
   selectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
   hallList.innerHTML = halls
-    .filter(name => name.toLowerCase().includes(query))
     .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
     .join('');
 }
@@ -1340,6 +1349,9 @@ document.addEventListener('focusout', () => {
 document.addEventListener('pointerdown', event => {
   if (!event.target.closest('input, textarea, select')) document.activeElement?.blur?.();
 }, true);
+document.addEventListener('dblclick', event => {
+  event.preventDefault();
+}, { passive:false });
 
 document.querySelectorAll('[data-report-type]').forEach(button => {
   button.addEventListener('click', () => {
@@ -1355,13 +1367,11 @@ loftSelect.addEventListener('change', () => {
   state.event.hall = '';
   state.event.halls = [];
   state.event.customHall = '';
-  hallSearch.value = '';
   saveDraft();
   renderBoundFields();
   renderHalls();
 });
 
-hallSearch.addEventListener('input', renderHalls);
 hallList.addEventListener('click', event => {
   const button = event.target.closest('[data-hall]');
   if (!button) return;
@@ -1376,6 +1386,12 @@ hallList.addEventListener('click', event => {
 
 eventType.addEventListener('change', () => { state.event.eventType = eventType.value; saveDraft(); renderBoundFields(); });
 contactType.addEventListener('change', () => { state.event.contactType = contactType.value; saveDraft(); renderBoundFields(); });
+tastingHallSelect.addEventListener('change', () => {
+  state.tasting.eventHall = tastingHallSelect.value;
+  state.tasting.hall = tastingHallSelect.value;
+  saveDraft();
+  renderBoundFields();
+});
 
 formatChips.addEventListener('click', event => {
   const button = event.target.closest('[data-format]');
