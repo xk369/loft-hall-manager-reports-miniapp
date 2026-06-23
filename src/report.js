@@ -117,7 +117,9 @@ export function validateTastingPayload(payload) {
   assertRequired(tasting.opManager, 'Укажите ОП.');
   assertRequired(tasting.orManager, 'Укажите ОР.');
   assertValidDate(tasting.eventDate, 'Укажите дату мероприятия.');
-  assertRequired(tasting.eventHall || tasting.hall, 'Укажите зал мероприятия.');
+  if (!cleanText(tasting.eventHall) && !cleanText(tasting.hall) && (!Array.isArray(tasting.halls) || tasting.halls.map(cleanText).filter(Boolean).length === 0)) {
+    throw new Error('Укажите зал мероприятия.');
+  }
 }
 
 export function buildReportText(payload, photoCount) {

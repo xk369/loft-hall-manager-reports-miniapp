@@ -138,7 +138,10 @@ test('formats tasting report', () => {
           opManager: 'Иванова',
           orManager: 'Петрова',
           eventDate: '2026-07-20',
-          eventHall: 'Grace',
+          loft: 'LOFT#3',
+          halls: ['Grace', 'Sky'],
+          eventHall: 'Grace, Sky',
+          hall: 'Grace, Sky',
           comments: 'Гости согласовали меню.'
         }
       },
@@ -150,7 +153,9 @@ test('formats tasting report', () => {
       'Дата: 12.06.2026',
       'ОП: Иванова',
       'ОР: Петрова',
-      'Дегустация по мероприятию 20.07.2026 Grace',
+      'Лофт: LOFT#3',
+      'Зал: Grace, Sky',
+      'Дегустация по мероприятию 20.07.2026 Grace, Sky',
       'Комментарии: Гости согласовали меню.',
       '',
       '━━━━━━━━━━━━━━━',
@@ -159,4 +164,26 @@ test('formats tasting report', () => {
       'Фото отправлены выше: 5 шт.'
     ].join('\n')
   );
+});
+
+test('builds tasting report with loft and multiple halls', () => {
+  const text = buildReportText(
+    {
+      type: 'tasting',
+      tasting: {
+        date: '2026-06-12',
+        opManager: 'Иванова',
+        orManager: 'Петрова',
+        eventDate: '2026-07-20',
+        loft: 'LOFT#2',
+        halls: ['BACKYARD', "Rt’s&Rc’s"],
+        comments: ''
+      }
+    },
+    0
+  );
+
+  assert.match(text, /Лофт: LOFT#2/);
+  assert.match(text, /Зал: BACKYARD, Rt’s&Rc’s/);
+  assert.match(text, /Дегустация по мероприятию 20\.07\.2026 BACKYARD, Rt’s&Rc’s/);
 });

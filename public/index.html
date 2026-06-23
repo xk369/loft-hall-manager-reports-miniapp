@@ -707,7 +707,8 @@ body.input-focused .bar{
           <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.eventDate"><label class="label">Дата мероприятия</label><input class="input" type="date" data-bind="tasting.eventDate"><div class="field-error"></div></div>
-          <div class="field" data-field="tasting.eventHall"><label class="label">Зал мероприятия</label><select class="select" id="tastingHallSelect" data-bind="tasting.eventHall"></select><div class="field-error"></div></div>
+          <div class="field"><label class="label">Лофт мероприятия</label><select class="select" id="tastingLoftSelect"></select></div>
+          <div class="field" data-field="tasting.halls"><label class="label">Залы мероприятия</label><div class="selected-line" id="tastingSelectedHalls"></div><div class="hall-list" id="tastingHallList"></div><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
           <div id="tastingPhotoMount"></div>
         </div>
@@ -809,7 +810,10 @@ const loftSelect = document.getElementById('loftSelect');
 const hallList = document.getElementById('hallList');
 const selectedHalls = document.getElementById('selectedHalls');
 const customHall = document.getElementById('customHall');
-const tastingHallSelect = document.getElementById('tastingHallSelect');
+const tastingLoftSelect = document.getElementById('tastingLoftSelect');
+const tastingHallList = document.getElementById('tastingHallList');
+const tastingSelectedHalls = document.getElementById('tastingSelectedHalls');
+const tastingCustomHall = document.getElementById('tastingCustomHall');
 const eventType = document.getElementById('eventType');
 const contactType = document.getElementById('contactType');
 const customEventType = document.getElementById('customEventType');
@@ -835,10 +839,6 @@ const lofts = {
   'Вишневый сад':['CHEKHOV HALL','LEVITAN HALL'],
   'Другое':[]
 };
-const allHalls = [...new Set(Object.entries(lofts)
-  .filter(([loft]) => loft !== 'Другое')
-  .flatMap(([, halls]) => halls))]
-  .sort((a,b) => a.localeCompare(b, 'ru'));
 
 const eventTypes = ['Свадьба','Корпоратив','День рождения','Выпускной','Конференция','Деловое мероприятие','Другое'];
 const formats = ['Банкет','Фуршет','Кофе-брейк','Выездной кейтеринг','Другое'];
@@ -888,7 +888,7 @@ function createInitialState(){
       contactComment:'',
       serviceStaff:''
     },
-    tasting:{ date:today, opManager:'', orManager:'', eventDate:'', eventHall:'', eventName:'', hall:'', comments:'' },
+    tasting:{ date:today, opManager:'', orManager:'', eventDate:'', loft:'LOFT#3', halls:[], customHall:'', eventHall:'', eventName:'', hall:'', comments:'' },
     departments:Object.fromEntries(ALL_DEPARTMENTS.map(name => [name,{ status: OPTIONAL_DEPARTMENTS.includes(name) ? 'na' : '', comment:'' }])),
     about:{ summary:'', communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' },
     photosLater:false
@@ -997,6 +997,7 @@ function renderAll(){
   renderBoundFields();
   renderTypes();
   renderHalls();
+  renderTastingHalls();
   renderFormats();
   renderDepartments();
   renderPhotos();
@@ -1005,9 +1006,9 @@ function renderAll(){
 
 function renderSelects(){
   loftSelect.innerHTML = Object.keys(lofts).map(name => `<option ${state.event.loft === name ? 'selected' : ''}>${name}</option>`).join('');
+  tastingLoftSelect.innerHTML = Object.keys(lofts).map(name => `<option ${state.tasting.loft === name ? 'selected' : ''}>${name}</option>`).join('');
   eventType.innerHTML = `<option value="">Выберите тип</option>${eventTypes.map(name => `<option ${state.event.eventType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
   contactType.innerHTML = `<option value="">Выберите контакт</option>${contactTypes.map(name => `<option ${state.event.contactType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
-  tastingHallSelect.innerHTML = `<option value="">Выберите зал</option>${allHalls.map(name => `<option value="${escapeHtml(name)}" ${state.tasting.eventHall === name ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}`;
 }
 
 function renderBoundFields(){
@@ -1027,6 +1028,7 @@ function renderBoundFields(){
   customContactType.classList.add('hidden');
   customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
   customHall.classList.toggle('hidden', state.event.loft !== 'Другое');
+  tastingCustomHall.classList.toggle('hidden', state.tasting.loft !== 'Другое');
 }
 
 function renderTypes(){
@@ -1042,6 +1044,16 @@ function renderHalls(){
   selectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
   hallList.innerHTML = halls
     .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
+    .join('');
+}
+
+function renderTastingHalls(){
+  const halls = [...(lofts[state.tasting.loft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
+  const selected = getSelectedTastingHalls();
+  tastingHallList.classList.toggle('hidden', state.tasting.loft === 'Другое');
+  tastingSelectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
+  tastingHallList.innerHTML = halls
+    .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-tasting-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
     .join('');
 }
 
@@ -1099,7 +1111,7 @@ function renderReview(){
     rows.push(['Не применимо', na.join(', ') || 'Нет']);
     rows.push(['ABOUT', buildAboutText(payload.about) || 'Не заполнено']);
   } else {
-    rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Дата мероприятия', payload.tasting.eventDate], ['Зал мероприятия', payload.tasting.eventHall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
+    rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Дата мероприятия', payload.tasting.eventDate], ['Лофт мероприятия', payload.tasting.loft], ['Залы мероприятия', payload.tasting.hall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
   }
   rows.push(['Фото', state.photosLater ? 'Скинут отдельно в группу' : `${photos.length} шт.`]);
 
@@ -1143,14 +1155,28 @@ function getSelectedHalls(){
   return Array.isArray(state.event.halls) ? state.event.halls.map(cleanText).filter(Boolean) : [];
 }
 
+function getSelectedTastingHalls(){
+  if (state.tasting.loft === 'Другое') {
+    return cleanText(state.tasting.customHall)
+      .split(',')
+      .map(cleanText)
+      .filter(Boolean);
+  }
+  return Array.isArray(state.tasting.halls) ? state.tasting.halls.map(cleanText).filter(Boolean) : [];
+}
+
 function buildPayload(){
   if (state.type === 'tasting') {
+    const selectedHallsValue = getSelectedTastingHalls();
+    const tastingHallValue = joinList(selectedHallsValue);
     return {
       type:'tasting',
       tasting:{
         ...state.tasting,
-        eventName:`Дегустация по мероприятию ${state.tasting.eventDate || ''} ${state.tasting.eventHall || ''}`.trim(),
-        hall:state.tasting.eventHall
+        halls:selectedHallsValue,
+        eventHall:tastingHallValue,
+        eventName:`Дегустация по мероприятию ${state.tasting.eventDate || ''} ${tastingHallValue}`.trim(),
+        hall:tastingHallValue
       },
       photosLater:state.photosLater
     };
@@ -1209,7 +1235,10 @@ function validateCurrentScreen(){
     requireField('tasting.opManager', payload.tasting.opManager, 'Укажите ОП.');
     requireField('tasting.orManager', payload.tasting.orManager, 'Укажите ОР.');
     requireField('tasting.eventDate', payload.tasting.eventDate, 'Укажите дату мероприятия.');
-    requireField('tasting.eventHall', payload.tasting.eventHall, 'Укажите зал мероприятия.');
+    if (!payload.tasting.halls.length) {
+      markInvalid('tasting.halls', 'Выберите один или несколько залов мероприятия.');
+      throw new Error('Выберите один или несколько залов мероприятия.');
+    }
     if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии отдельно в группу».');
     if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
   }
@@ -1324,7 +1353,7 @@ async function submitReport(){
     showError(error.message);
     nextBtn.disabled = false;
     backBtn.disabled = false;
-    nextBtn.textContent = 'Отправить';
+    nextBtn.textContent = 'Отправить фото и отчёт';
   }
 }
 
@@ -1334,6 +1363,7 @@ document.addEventListener('input', event => {
   pathSet(input.dataset.bind, input.value);
   renderBoundFields();
   renderHalls();
+  renderTastingHalls();
   clearInvalidFields();
 });
 
@@ -1372,6 +1402,17 @@ loftSelect.addEventListener('change', () => {
   renderHalls();
 });
 
+tastingLoftSelect.addEventListener('change', () => {
+  state.tasting.loft = tastingLoftSelect.value;
+  state.tasting.hall = '';
+  state.tasting.halls = [];
+  state.tasting.eventHall = '';
+  state.tasting.customHall = '';
+  saveDraft();
+  renderBoundFields();
+  renderTastingHalls();
+});
+
 hallList.addEventListener('click', event => {
   const button = event.target.closest('[data-hall]');
   if (!button) return;
@@ -1384,14 +1425,21 @@ hallList.addEventListener('click', event => {
   renderHalls();
 });
 
+tastingHallList.addEventListener('click', event => {
+  const button = event.target.closest('[data-tasting-hall]');
+  if (!button) return;
+  const hall = button.dataset.tastingHall;
+  state.tasting.halls = state.tasting.halls.includes(hall)
+    ? state.tasting.halls.filter(item => item !== hall)
+    : [...state.tasting.halls, hall];
+  state.tasting.hall = joinList(state.tasting.halls);
+  state.tasting.eventHall = state.tasting.hall;
+  saveDraft();
+  renderTastingHalls();
+});
+
 eventType.addEventListener('change', () => { state.event.eventType = eventType.value; saveDraft(); renderBoundFields(); });
 contactType.addEventListener('change', () => { state.event.contactType = contactType.value; saveDraft(); renderBoundFields(); });
-tastingHallSelect.addEventListener('change', () => {
-  state.tasting.eventHall = tastingHallSelect.value;
-  state.tasting.hall = tastingHallSelect.value;
-  saveDraft();
-  renderBoundFields();
-});
 
 formatChips.addEventListener('click', event => {
   const button = event.target.closest('[data-format]');
