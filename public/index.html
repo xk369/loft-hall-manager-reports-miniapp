@@ -7,43 +7,26 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
-  color-scheme:light dark;
-  --bg:#f5f5f7;
-  --ink:#111116;
-  --muted:#6f7078;
-  --muted-2:#8b8d96;
-  --panel:rgba(255,255,255,.88);
-  --panel-2:#ffffff;
-  --field:rgba(245,245,247,.92);
-  --line:rgba(17,17,22,.09);
-  --line-strong:rgba(17,17,22,.14);
-  --accent:#6d5dfc;
-  --mint:#45c0a7;
-  --danger:#c74444;
-  --warning:#b58124;
-  --success:#16865d;
-  --shadow:0 18px 55px rgba(13,13,18,.08);
-  --radius:24px;
-}
-
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#0b0b0e;
-    --ink:#f5f5f7;
-    --muted:#9b9ca5;
-    --muted-2:#747682;
-    --panel:rgba(23,23,28,.88);
-    --panel-2:#17171c;
-    --field:rgba(31,31,38,.92);
-    --line:rgba(255,255,255,.09);
-    --line-strong:rgba(255,255,255,.14);
-    --accent:#8b7cff;
-    --mint:#45c995;
-    --danger:#ff7979;
-    --warning:#f0c46f;
-    --success:#45c995;
-    --shadow:0 22px 65px rgba(0,0,0,.34);
-  }
+  color-scheme:dark;
+  --bg:#0b0c0f;
+  --bg-soft:#101116;
+  --ink:#f4f4f5;
+  --muted:#a1a1aa;
+  --muted-2:#71717a;
+  --panel:rgba(21,22,27,.92);
+  --panel-2:#1b1c22;
+  --field:#111216;
+  --line:rgba(255,255,255,.10);
+  --line-strong:rgba(255,255,255,.16);
+  --accent:#8b7cff;
+  --accent-soft:rgba(139,124,255,.14);
+  --mint:#22c55e;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --success:#22c55e;
+  --shadow:0 20px 58px rgba(0,0,0,.28);
+  --shadow-soft:0 12px 30px rgba(0,0,0,.18);
+  --radius:18px;
 }
 
 *{ box-sizing:border-box; }
@@ -52,8 +35,9 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   background:
-    radial-gradient(circle at 55% 0%, color-mix(in srgb,var(--accent) 16%, transparent), transparent 42%),
-    var(--bg);
+    linear-gradient(180deg, rgba(255,255,255,.026), transparent 34%),
+    repeating-linear-gradient(90deg, transparent 0 64px, rgba(255,255,255,.018) 64px 65px),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
@@ -62,7 +46,7 @@ body{
 button,input,select,textarea{ font:inherit; }
 button{ border:0; color:inherit; }
 textarea{ resize:vertical; min-height:92px; }
-.textarea.compact{ min-height:112px; }
+.textarea.compact{ min-height:108px; }
 
 .app{
   width:min(100%,480px);
@@ -77,9 +61,9 @@ textarea{ resize:vertical; min-height:92px; }
   position:sticky;
   top:0;
   z-index:20;
-  padding:max(14px,env(safe-area-inset-top)) 18px 14px;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 96%,transparent),color-mix(in srgb,var(--bg) 84%,transparent));
-  backdrop-filter:blur(20px) saturate(1.08);
+  padding:max(10px,env(safe-area-inset-top)) 16px 12px;
+  background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:blur(18px) saturate(1.04);
   border-bottom:1px solid var(--line);
 }
 
@@ -88,14 +72,14 @@ textarea{ resize:vertical; min-height:92px; }
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin-bottom:13px;
+  margin-bottom:10px;
 }
 
 .brand-title{
   min-width:0;
-  font-weight:850;
+  font-weight:760;
   letter-spacing:.01em;
-  font-size:18px;
+  font-size:17px;
 }
 
 .brand-sub{
@@ -106,7 +90,7 @@ textarea{ resize:vertical; min-height:92px; }
 }
 
 .progress{
-  height:5px;
+  height:3px;
   border-radius:999px;
   background:rgba(255,255,255,.08);
   overflow:hidden;
@@ -117,19 +101,19 @@ textarea{ resize:vertical; min-height:92px; }
   height:100%;
   width:0;
   border-radius:inherit;
-  background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 58%,var(--mint)));
+  background:var(--accent);
   transition:width 240ms ease;
 }
 
 .screen{
   flex:1;
-  padding:18px 18px calc(96px + env(safe-area-inset-bottom));
+  padding:16px 16px calc(124px + env(safe-area-inset-bottom));
   display:none;
 }
 
 .screen.active{ display:block; }
 .screen[data-screen="0"].active{
-  min-height:calc(100dvh - 132px);
+  min-height:calc(100dvh - 108px);
   display:grid;
   align-items:center;
 }
@@ -137,13 +121,11 @@ textarea{ resize:vertical; min-height:92px; }
 .stack{ display:grid; gap:12px; }
 
 .panel{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
-    var(--panel);
+  background:var(--panel);
   border:1px solid var(--line);
   border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:16px;
+  box-shadow:var(--shadow-soft);
+  padding:14px;
 }
 
 .screen[data-screen="0"] .panel{
@@ -155,38 +137,44 @@ textarea{ resize:vertical; min-height:92px; }
 
 .intro-kicker{
   color:var(--muted-2);
-  font-size:12px;
-  font-weight:850;
-  letter-spacing:.16em;
+  font-size:11px;
+  font-weight:760;
+  letter-spacing:.08em;
   margin-bottom:8px;
+  text-transform:uppercase;
 }
 
 .intro-title{
-  margin:0 0 22px;
-  font-size:42px;
-  line-height:.98;
-  font-weight:880;
-  letter-spacing:-.045em;
+  margin:0 0 8px;
+  font-size:34px;
+  line-height:1.02;
+  font-weight:780;
+  letter-spacing:0;
+}
+
+.intro-subtitle{
+  margin:0 0 20px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.45;
 }
 
 .choice-grid{
   display:grid;
   grid-template-columns:1fr;
-  gap:10px;
+  gap:8px;
 }
 
 .type-card{
-  min-height:116px;
+  min-height:92px;
   text-align:left;
-  border-radius:22px;
-  padding:20px;
+  border-radius:18px;
+  padding:15px;
   border:1px solid var(--line-strong);
-  background:
-    linear-gradient(135deg, color-mix(in srgb,var(--accent) 12%,transparent), transparent 48%),
-    var(--panel);
-  box-shadow:var(--shadow);
+  background:var(--panel);
+  box-shadow:none;
   display:flex;
-  align-items:flex-end;
+  align-items:center;
   justify-content:space-between;
   gap:16px;
   cursor:pointer;
@@ -195,51 +183,48 @@ textarea{ resize:vertical; min-height:92px; }
 .type-card:active{ transform:scale(.99); }
 .type-card::after{
   content:"";
-  inline-size:34px;
-  block-size:34px;
+  inline-size:20px;
+  block-size:20px;
   border-radius:50%;
   border:1px solid var(--line-strong);
-  background:rgba(255,255,255,.035);
+  background:var(--field);
 }
 
 .type-card.active{
   outline:none;
   border-color:color-mix(in srgb,var(--accent) 58%,var(--line));
-  background:
-    linear-gradient(135deg, color-mix(in srgb,var(--accent) 18%,transparent), color-mix(in srgb,var(--mint) 8%,transparent) 54%, transparent),
-    var(--panel);
+  background:color-mix(in srgb,var(--accent) 8%,var(--panel));
 }
 .type-card.active::after{
-  border-color:transparent;
-  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--mint)));
-  box-shadow:0 0 0 4px rgba(143,200,255,.10);
+  border:5px solid var(--accent);
+  background:var(--panel-2);
 }
 
 .type-name{
-  font-size:30px;
-  font-weight:860;
-  line-height:1.08;
-  letter-spacing:-.02em;
+  font-size:18px;
+  font-weight:780;
+  line-height:1.18;
+  letter-spacing:0;
 }
 
 .type-note{
-  margin-top:8px;
+  margin-top:6px;
   color:var(--muted);
-  font-size:0;
+  font-size:13px;
   line-height:1.35;
 }
 
 .section-title{
   margin:0 0 12px;
-  font-size:24px;
-  line-height:1.08;
-  font-weight:860;
-  letter-spacing:-.02em;
+  font-size:20px;
+  line-height:1.18;
+  font-weight:780;
+  letter-spacing:0;
 }
 
 .section-note{
   color:var(--muted);
-  font-size:14px;
+  font-size:13px;
   line-height:1.42;
   margin:0 0 12px;
 }
@@ -247,9 +232,9 @@ textarea{ resize:vertical; min-height:92px; }
 .field{ display:grid; gap:8px; margin-top:14px; min-width:0; }
 .field:first-child{ margin-top:0; }
 .label{
-  font-size:13px;
+  font-size:12px;
   color:var(--muted);
-  font-weight:760;
+  font-weight:720;
 }
 
 .input,.select,.textarea{
@@ -257,17 +242,17 @@ textarea{ resize:vertical; min-height:92px; }
   max-width:100%;
   border:1px solid var(--line);
   min-width:0;
-  border-radius:16px;
+  border-radius:14px;
   background:var(--field);
   color:var(--ink);
-  padding:14px 13px;
-  font-size:16px;
+  padding:13px 12px;
+  font-size:15px;
   line-height:1.2;
   outline:none;
 }
 
 .input,.select{
-  min-height:52px;
+  min-height:48px;
 }
 
 input[type="date"]{
@@ -305,12 +290,12 @@ input[type="date"]{
 
 .chip{
   border-radius:999px;
-  padding:9px 12px;
+  padding:8px 11px;
   background:var(--field);
   border:1px solid var(--line);
   color:var(--ink);
-  font-size:13px;
-  font-weight:800;
+  font-size:12px;
+  font-weight:720;
 }
 
 .chip.active{
@@ -355,23 +340,21 @@ input[type="date"]{
   background:color-mix(in srgb,var(--accent) 14%,var(--panel));
   color:var(--accent);
   font-size:12px;
-  font-weight:900;
+  font-weight:760;
 }
 
 .departments-list{
   display:grid;
-  gap:12px;
+  gap:10px;
 }
 
 .dept-card{
   border:1px solid var(--line);
   border-radius:var(--radius);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.028), transparent),
-    var(--panel);
-  padding:16px;
+  background:var(--panel);
+  padding:14px;
   display:grid;
-  gap:12px;
+  gap:10px;
 }
 
 .dept-top{
@@ -382,72 +365,102 @@ input[type="date"]{
 }
 
 .dept-name{
-  font-size:16px;
-  font-weight:860;
-  letter-spacing:.04em;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:.03em;
 }
 
 .hint{
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
   line-height:1.38;
+}
+
+.control-label{
+  color:var(--muted-2);
+  font-size:11px;
+  font-weight:760;
+  text-transform:uppercase;
+  letter-spacing:.06em;
 }
 
 .status-row{
   display:grid;
   grid-template-columns:repeat(3, minmax(0,1fr));
-  gap:7px;
-  padding:5px;
-  border-radius:18px;
-  background:color-mix(in srgb,var(--field) 74%,transparent);
+  gap:4px;
+  padding:4px;
+  border-radius:14px;
+  background:var(--field);
   border:1px solid var(--line);
 }
 
 .status-row.has-na{
-  grid-template-columns:repeat(3, minmax(0,1fr));
+  grid-template-columns:repeat(4, minmax(0,1fr));
 }
 
 .status-btn{
-  min-height:50px;
-  border-radius:14px;
-  padding:8px 7px;
+  min-height:42px;
+  border-radius:10px;
+  padding:7px 6px;
   background:transparent;
   border:1px solid transparent;
-  font-size:12px;
-  font-weight:800;
+  font-size:11px;
+  font-weight:720;
   line-height:1.15;
   text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.status-btn::before{
+  content:"";
+  inline-size:7px;
+  block-size:7px;
+  border-radius:50%;
+  background:var(--muted-2);
+  flex:0 0 auto;
+}
+.status-btn[data-status="ok"]::before{ background:var(--success); }
+.status-btn[data-status="warning"]::before{ background:var(--warning); }
+.status-btn[data-status="critical"]::before{ background:var(--danger); }
+.status-btn[data-status="na"]::before{ background:var(--muted-2); }
+.status-btn[data-status="na"]::before{
+  inline-size:8px;
+  block-size:1px;
+  border-radius:0;
 }
 .status-btn[data-status="na"]{
-  grid-column:1 / -1;
+  grid-column:auto;
   min-height:42px;
   color:var(--muted);
-  background:rgba(255,255,255,.025);
-  border-color:var(--line);
+  background:transparent;
+  border-color:transparent;
 }
 .status-btn.active[data-status="ok"]{ border-color:var(--success); color:var(--success); }
 .status-btn.active[data-status="warning"]{ border-color:var(--warning); color:var(--warning); }
 .status-btn.active[data-status="critical"]{ border-color:var(--danger); color:var(--danger); }
 .status-btn.active[data-status="na"]{ border-color:var(--muted); color:var(--muted); }
 .status-btn.active{
-  background:var(--panel);
-  box-shadow:0 10px 24px rgba(0,0,0,.08);
+  background:var(--panel-2);
+  box-shadow:none;
 }
 
 .photo-actions{
   display:grid;
-  gap:10px;
+  gap:8px;
 }
 
 .photo-pick-btn{
   width:100%;
-  border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));
-  border-radius:22px;
-  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--panel)),color-mix(in srgb,var(--accent) 8%,var(--panel)));
-  padding:20px 18px;
+  min-height:46px;
+  border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));
+  border-radius:14px;
+  background:color-mix(in srgb,var(--accent) 8%,var(--panel));
+  padding:0 14px;
   text-align:center;
-  font-weight:900;
-  font-size:22px;
+  font-weight:760;
+  font-size:14px;
 }
 
 .photo-input{
@@ -469,19 +482,20 @@ input[type="date"]{
   position:relative;
   aspect-ratio:1;
   overflow:hidden;
-  border-radius:14px;
+  border-radius:12px;
   background:var(--field);
   border:1px solid var(--line);
 }
 
 .skip-photo{
   width:100%;
-  text-align:left;
-  border-radius:18px;
-  padding:17px 16px;
+  min-height:44px;
+  border-radius:14px;
+  padding:0 12px;
   background:var(--field);
   border:1px solid var(--line);
-  font-weight:900;
+  font-weight:720;
+  font-size:13px;
   text-align:center;
 }
 .skip-photo.active{
@@ -509,18 +523,23 @@ input[type="date"]{
 
 .review-block{
   display:grid;
-  gap:9px;
-  font-size:14px;
+  gap:0;
+  font-size:13px;
   line-height:1.42;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
 }
 
 .review-row{
   display:flex;
   justify-content:space-between;
   gap:12px;
-  padding-bottom:8px;
+  padding:10px 12px;
   border-bottom:1px solid var(--line);
+  background:var(--field);
 }
+.review-row:last-child{ border-bottom:0; }
 
 .review-row span:first-child{ color:var(--muted); }
 .review-row span:last-child{ text-align:right; font-weight:800; }
@@ -575,9 +594,11 @@ input[type="date"]{
   z-index:30;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px;
-  padding:10px 14px max(10px,env(safe-area-inset-bottom));
-  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 92%,transparent) 18%,var(--bg));
+  gap:8px;
+  padding:8px 14px max(8px,env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 96%,transparent) 22%,var(--bg));
+  border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);
+  backdrop-filter:blur(18px);
 }
 
 body.input-focused .bar{
@@ -585,18 +606,20 @@ body.input-focused .bar{
 }
 
 .btn{
-  min-height:52px;
-  border-radius:16px;
-  font-weight:900;
-  background:var(--panel);
+  min-height:48px;
+  border-radius:14px;
+  font-weight:760;
+  font-size:14px;
+  background:var(--field);
   border:1px solid var(--line);
-  box-shadow:var(--shadow);
+  box-shadow:none;
 }
 
 .btn.primary{
-  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--mint)));
-  border-color:transparent;
+  background:var(--accent);
+  border-color:var(--accent);
   color:#fff;
+  font-size:13px;
 }
 .btn:disabled{ opacity:.55; }
 
@@ -633,13 +656,20 @@ body.input-focused .bar{
       <div class="stack">
         <div class="panel">
           <div class="intro-kicker">MANAGER REPORT</div>
-          <h1 class="intro-title">Новый отчёт</h1>
+          <h1 class="intro-title">Выберите тип отчёта</h1>
+          <p class="intro-subtitle">Создайте структурированный отчёт по мероприятию.</p>
           <div class="choice-grid">
             <button class="type-card active" type="button" data-report-type="event">
-              <div class="type-name">Ивент</div>
+              <div>
+                <div class="type-name">Ивент</div>
+                <div class="type-note">Отчёт по проведённому мероприятию</div>
+              </div>
             </button>
             <button class="type-card" type="button" data-report-type="tasting">
-              <div class="type-name">Дегустация</div>
+              <div>
+                <div class="type-name">Дегустация</div>
+                <div class="type-note">Отчёт по дегустации или тестовой подаче</div>
+              </div>
             </button>
           </div>
         </div>
@@ -681,7 +711,7 @@ body.input-focused .bar{
       <div class="stack">
         <div class="panel" id="departmentsPanel">
           <h2 class="section-title">Оценка служб</h2>
-          <p class="section-note">Для жёлтых и красных статусов комментарий обязателен. BAR и HOOKAH можно отметить как не применимо.</p>
+          <p class="section-note">Для статусов с замечаниями комментарий обязателен. BAR и HOOKAH можно отметить как не применимо.</p>
         </div>
         <div id="departments"></div>
 
@@ -698,16 +728,16 @@ body.input-focused .bar{
           <div id="photoSection">
             <div class="panel">
               <h2 class="section-title">Фотоотчёт</h2>
-              <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их отдельно.</p>
+              <p class="section-note">Добавьте фотографии мероприятия. Они будут отправлены в группу перед текстовым отчётом.</p>
               <div class="photo-actions">
-                <button class="photo-pick-btn" id="photoPickBtn" type="button">Выбрать фотографии</button>
+                <button class="photo-pick-btn" id="photoPickBtn" type="button">Добавить фотографии</button>
                 <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии отдельно в группу</button>
               </div>
               <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
             </div>
 
             <div class="panel">
-              <h2 class="section-title" id="photoCount">Фото: 0</h2>
+              <h2 class="section-title" id="photoCount">Загружено: 0 из 30</h2>
               <div class="photo-grid" id="photoGrid"></div>
             </div>
           </div>
@@ -803,10 +833,10 @@ const eventTypes = ['Свадьба','Корпоратив','День рожде
 const formats = ['Банкет','Фуршет','Кофе-брейк','Выездной кейтеринг','Другое'];
 const contactTypes = ['Организатор','Заказчик','Координатор'];
 const statusOptions = [
-  ['ok','🟢 Без замечаний'],
-  ['warning','🟡 Есть замечания'],
-  ['critical','🔴 Серьёзные замечания'],
-  ['na','Не было на мероприятии']
+  ['ok','Без замечаний'],
+  ['warning','Есть замечания'],
+  ['critical','Серьёзные'],
+  ['na','Не применимо']
 ];
 const departmentHints = {
   SALES:'Заполняйте при наличии замечаний к подготовке мероприятия отделом продаж. Укажите недочёты в ТЗ, схеме, таймингах, передаче информации или коммуникации.',
@@ -1026,6 +1056,7 @@ function renderDepartments(){
       <div class="dept-card">
         <div class="dept-top"><div class="dept-name">${name}</div></div>
         <div class="hint">${departmentHints[name]}</div>
+        <div class="control-label">Статус</div>
         <div class="status-row ${isOptional ? 'has-na' : ''}">${options}</div>
         <textarea class="textarea ${needsComment ? '' : 'hidden'}" data-department-comment="${name}" placeholder="Опишите конкретно, что произошло">${escapeHtml(entry.comment)}</textarea>
       </div>
@@ -1034,7 +1065,7 @@ function renderDepartments(){
 }
 
 function renderPhotos(){
-  photoCount.textContent = `Фото: ${photos.length}`;
+  photoCount.textContent = `Загружено: ${photos.length} из ${MAX_PHOTOS}`;
   photosLaterBtn.classList.toggle('active', state.photosLater);
   photoInput.disabled = state.photosLater;
   photoPickBtn.disabled = state.photosLater;
@@ -1072,7 +1103,7 @@ function renderScreen(){
   document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', Number(screen.dataset.screen) === currentScreen));
   progressBar.style.width = `${screenIndex === 0 ? 0 : Math.round((screenIndex / (steps.length - 1)) * 100)}%`;
   backBtn.disabled = screenIndex === 0;
-  nextBtn.textContent = screenIndex === 0 ? 'Начать' : (screenIndex === steps.length - 1 ? 'Отправить' : 'Далее');
+  nextBtn.textContent = screenIndex === 0 ? 'Начать' : (screenIndex === steps.length - 1 ? 'Отправить фото и отчёт' : 'Далее');
   stepLabel.textContent = ['Выбор отчёта','Данные','Детали','ABOUT THE EVENT','Фото','Проверка'][currentScreen];
   if (currentScreen === 5) renderReview();
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -1236,7 +1267,7 @@ async function addPhotos(fileList){
   state.photosLater = false;
   saveDraft();
   photoPickBtn.disabled = true;
-  photoPickBtn.textContent = 'Готовим фото...';
+  photoPickBtn.textContent = 'Подготовка фото...';
   try {
     const validFiles = [];
     for (const file of incoming) {
@@ -1252,7 +1283,7 @@ async function addPhotos(fileList){
     });
   } finally {
     photoPickBtn.disabled = false;
-    photoPickBtn.textContent = 'Выбрать фотографии';
+    photoPickBtn.textContent = 'Добавить фотографии';
   }
   renderPhotos();
 }
