@@ -104,14 +104,16 @@ app.post('/api/reports', async (request, response) => {
     const { fields, files } = await parseMultipartRequest(request, { maxBytes: config.maxUploadBytes });
     const telegram = validateRequestInitData(fields.initData);
     const payload = parseReportPayload(fields.reportPayload);
-    const photos = validatePhotos(files);
+    const photos = validatePhotos(files, payload);
     const reportText = normalizeReportText(buildReportText(payload, photos.length));
 
-    await sendPhotosBeforeReport({
-      botToken: config.botToken,
-      chatId: config.eventReportsChatId,
-      photos
-    });
+    if (photos.length > 0) {
+      await sendPhotosBeforeReport({
+        botToken: config.botToken,
+        chatId: config.eventReportsChatId,
+        photos
+      });
+    }
     const message = await sendTelegramMessage({
       botToken: config.botToken,
       chatId: config.eventReportsChatId,

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { formatEventReport, formatTastingReport } from '../public/report-format.js';
-import { buildReportText } from '../src/report.js';
+import { buildReportText, validatePhotos } from '../src/report.js';
 
 const eventPayload = {
   type: 'event',
@@ -113,6 +113,17 @@ test('validates required service comments', () => {
   const payload = structuredClone(eventPayload);
   payload.departments.SUPPORT.comment = '';
   assert.throws(() => buildReportText(payload, 1), /SUPPORT/);
+});
+
+test('formats deferred photo status', () => {
+  const payload = structuredClone(eventPayload);
+  payload.photosLater = true;
+  assert.match(formatEventReport(payload, 0), /Фото будут отправлены позже\./);
+});
+
+test('allows reports without photos only when photos are deferred', () => {
+  assert.throws(() => validatePhotos([], { photosLater: false }), /Добавьте хотя бы одно фото/);
+  assert.deepEqual(validatePhotos([], { photosLater: true }), []);
 });
 
 test('formats tasting report', () => {

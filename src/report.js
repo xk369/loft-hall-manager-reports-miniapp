@@ -58,8 +58,9 @@ function assertPhotoFiles(photos) {
   }
 }
 
-export function validatePhotos(files) {
+export function validatePhotos(files, payload = {}) {
   const photos = (files || []).filter(file => file.fieldName === 'photos');
+  if (payload.photosLater === true && photos.length === 0) return photos;
   assertPhotoFiles(photos);
   return photos;
 }
@@ -67,7 +68,9 @@ export function validatePhotos(files) {
 export function validateEventPayload(payload) {
   const event = payload?.event || {};
   assertValidDate(event.date);
-  assertRequired(event.hall, 'Укажите зал.');
+  if (!cleanText(event.hall) && (!Array.isArray(event.halls) || event.halls.map(cleanText).filter(Boolean).length === 0)) {
+    throw new Error('Укажите зал.');
+  }
   assertRequired(event.eventType, 'Укажите тип мероприятия.');
   assertRequired(event.eventName, 'Укажите название мероприятия.');
   assertRequired(event.guestCount, 'Укажите количество гостей.');

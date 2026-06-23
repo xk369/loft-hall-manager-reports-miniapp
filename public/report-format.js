@@ -44,6 +44,11 @@ export function joinList(values) {
     .join(', ');
 }
 
+export function formatPhotoStatus(photoCount = 0, photosLater = false) {
+  if (photosLater) return 'Фото будут отправлены позже.';
+  return `Фото отправлены выше: ${photoCount} шт.`;
+}
+
 export function getDepartmentStatusText(entry = {}) {
   return STATUS_LABELS[entry.status] || '';
 }
@@ -69,7 +74,7 @@ export function formatEventReport(payload, photoCount = 0) {
     'LOFT HALL · ОТЧЁТ ПО МЕРОПРИЯТИЮ',
     '',
     `Дата: ${formatDate(event.date)}`,
-    `Зал: ${cleanText(event.hall)}`,
+    `Зал: ${cleanText(event.hall) || joinList(event.halls)}`,
     `Мероприятие: ${cleanText(event.eventName)}`,
     `Тип: ${cleanText(event.eventType)}`,
     `Формат: ${joinList(event.formats)}`,
@@ -96,7 +101,7 @@ export function formatEventReport(payload, photoCount = 0) {
   }
 
   lines.push('━━━━━━━━━━━━━━━', 'ABOUT THE EVENT', '', aboutText || 'Не заполнено.');
-  lines.push('', '━━━━━━━━━━━━━━━', 'ФОТООТЧЁТ', '', `Фото отправлены выше: ${photoCount} шт.`);
+  lines.push('', '━━━━━━━━━━━━━━━', 'ФОТООТЧЁТ', '', formatPhotoStatus(photoCount, payload?.photosLater));
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -115,6 +120,6 @@ export function formatTastingReport(payload, photoCount = 0) {
     '━━━━━━━━━━━━━━━',
     'ФОТООТЧЁТ',
     '',
-    `Фото отправлены выше: ${photoCount} шт.`
+    formatPhotoStatus(photoCount, payload?.photosLater)
   ].join('\n');
 }

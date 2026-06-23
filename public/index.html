@@ -7,34 +7,21 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
-  --bg:#f5f6f8;
-  --card:#ffffff;
-  --card-soft:#f0f2f5;
-  --text:#111318;
-  --muted:#6e7480;
-  --line:rgba(15,18,25,.10);
-  --accent:#1f6feb;
-  --accent-2:#0f9f7a;
-  --danger:#d92d20;
-  --warning:#b7791f;
-  --success:#16825d;
-  --shadow:0 12px 30px rgba(17,19,24,.08);
-  --radius:18px;
-}
-
-.dark{
-  --bg:#111317;
-  --card:#1b1e24;
-  --card-soft:#252932;
-  --text:#f4f6fb;
-  --muted:#a1a8b3;
+  --bg:#0e1116;
+  --bg-2:#151922;
+  --card:#191e28;
+  --card-soft:#222837;
+  --text:#f8fafc;
+  --muted:#9aa3b2;
   --line:rgba(255,255,255,.10);
-  --accent:#67a7ff;
-  --accent-2:#4ed1ad;
-  --danger:#ff7b72;
-  --warning:#f2c36b;
-  --success:#59d39d;
-  --shadow:0 14px 36px rgba(0,0,0,.30);
+  --line-strong:rgba(255,255,255,.16);
+  --accent:#70b7ff;
+  --accent-2:#55d8bd;
+  --danger:#ff6b7a;
+  --warning:#f5c66d;
+  --success:#64d99f;
+  --shadow:0 18px 44px rgba(0,0,0,.32);
+  --radius:22px;
 }
 
 *{ box-sizing:border-box; }
@@ -42,7 +29,10 @@ html,body{ min-height:100%; }
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
-  background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 92%,#dfe4ec));
+  background:
+    radial-gradient(circle at 22% -8%, rgba(112,183,255,.18), transparent 32%),
+    radial-gradient(circle at 88% 10%, rgba(85,216,189,.12), transparent 28%),
+    linear-gradient(180deg,var(--bg),#12161d 52%,#171b22);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
@@ -65,8 +55,8 @@ textarea{ resize:vertical; min-height:92px; }
   position:sticky;
   top:0;
   z-index:20;
-  padding:max(12px,env(safe-area-inset-top)) 14px 10px;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 98%,transparent),color-mix(in srgb,var(--bg) 88%,transparent));
+  padding:max(14px,env(safe-area-inset-top)) 16px 12px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 98%,transparent),color-mix(in srgb,var(--bg) 86%,transparent));
   backdrop-filter:blur(18px);
   border-bottom:1px solid var(--line);
 }
@@ -92,19 +82,8 @@ textarea{ resize:vertical; min-height:92px; }
   margin-top:2px;
 }
 
-.theme-btn{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:var(--card);
-  border:1px solid var(--line);
-  box-shadow:var(--shadow);
-}
-
 .progress{
-  height:6px;
+  height:5px;
   border-radius:999px;
   background:var(--card-soft);
   overflow:hidden;
@@ -121,7 +100,7 @@ textarea{ resize:vertical; min-height:92px; }
 
 .screen{
   flex:1;
-  padding:16px 14px calc(88px + env(safe-area-inset-bottom));
+  padding:16px 16px calc(92px + env(safe-area-inset-bottom));
   display:none;
 }
 
@@ -134,22 +113,24 @@ textarea{ resize:vertical; min-height:92px; }
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
-  padding:16px;
+  padding:18px;
 }
 
 .choice-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
+  grid-template-columns:1fr;
+  gap:14px;
 }
 
 .type-card{
-  min-height:118px;
+  min-height:132px;
   text-align:left;
-  border-radius:18px;
-  padding:16px;
-  border:1px solid var(--line);
-  background:var(--card);
+  border-radius:24px;
+  padding:20px;
+  border:1px solid var(--line-strong);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.055), transparent 42%),
+    var(--card);
   box-shadow:var(--shadow);
 }
 
@@ -159,7 +140,7 @@ textarea{ resize:vertical; min-height:92px; }
 }
 
 .type-name{
-  font-size:20px;
+  font-size:30px;
   font-weight:900;
   line-height:1.08;
 }
@@ -167,13 +148,13 @@ textarea{ resize:vertical; min-height:92px; }
 .type-note{
   margin-top:8px;
   color:var(--muted);
-  font-size:13px;
+  font-size:0;
   line-height:1.35;
 }
 
 .section-title{
   margin:0 0 10px;
-  font-size:22px;
+  font-size:28px;
   line-height:1.12;
   font-weight:900;
   letter-spacing:-.02em;
@@ -181,12 +162,12 @@ textarea{ resize:vertical; min-height:92px; }
 
 .section-note{
   color:var(--muted);
-  font-size:14px;
+  font-size:15px;
   line-height:1.45;
   margin:0 0 14px;
 }
 
-.field{ display:grid; gap:7px; margin-top:12px; }
+.field{ display:grid; gap:8px; margin-top:14px; min-width:0; }
 .field:first-child{ margin-top:0; }
 .label{
   font-size:13px;
@@ -196,13 +177,43 @@ textarea{ resize:vertical; min-height:92px; }
 
 .input,.select,.textarea{
   width:100%;
+  max-width:100%;
   border:1px solid var(--line);
-  border-radius:14px;
+  min-width:0;
+  border-radius:16px;
   background:var(--card-soft);
   color:var(--text);
-  padding:13px 12px;
+  padding:14px 13px;
+  font-size:16px;
+  line-height:1.2;
   outline:none;
 }
+
+.input,.select{
+  min-height:52px;
+}
+
+input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+.field.is-invalid .input,
+.field.is-invalid .select,
+.field.is-invalid .textarea,
+.field.is-invalid .hall-list,
+.field.is-invalid .chips{
+  border-color:var(--danger);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--danger) 16%,transparent);
+}
+
+.field-error{
+  display:none;
+  color:var(--danger);
+  font-size:12px;
+  font-weight:800;
+}
+.field.is-invalid .field-error{ display:block; }
 
 .input:focus,.select:focus,.textarea:focus{
   border-color:color-mix(in srgb,var(--accent) 54%,var(--line));
@@ -237,6 +248,7 @@ textarea{ resize:vertical; min-height:92px; }
   display:grid;
   gap:7px;
   padding:2px;
+  border-radius:16px;
 }
 
 .hall-btn{
@@ -249,6 +261,24 @@ textarea{ resize:vertical; min-height:92px; }
 .hall-btn.active{
   border-color:var(--accent);
   color:var(--accent);
+}
+
+.selected-line{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+
+.selected-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border-radius:999px;
+  padding:7px 10px;
+  background:color-mix(in srgb,var(--accent) 14%,var(--card));
+  color:var(--accent);
+  font-size:12px;
+  font-weight:900;
 }
 
 .dept-card{
@@ -300,11 +330,12 @@ textarea{ resize:vertical; min-height:92px; }
 
 .photo-drop{
   position:relative;
-  border:1px dashed color-mix(in srgb,var(--accent) 44%,var(--line));
-  border-radius:18px;
-  background:color-mix(in srgb,var(--accent) 6%,var(--card));
-  padding:18px;
+  border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));
+  border-radius:22px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--card)),color-mix(in srgb,var(--accent-2) 10%,var(--card)));
+  padding:22px 18px;
   text-align:center;
+  overflow:hidden;
 }
 
 .photo-drop input{
@@ -315,7 +346,7 @@ textarea{ resize:vertical; min-height:92px; }
 
 .photo-title{
   font-weight:900;
-  font-size:17px;
+  font-size:22px;
 }
 
 .photo-grid{
@@ -331,6 +362,20 @@ textarea{ resize:vertical; min-height:92px; }
   border-radius:14px;
   background:var(--card-soft);
   border:1px solid var(--line);
+}
+
+.skip-photo{
+  width:100%;
+  text-align:left;
+  border-radius:18px;
+  padding:15px;
+  background:var(--card-soft);
+  border:1px solid var(--line);
+  font-weight:900;
+}
+.skip-photo.active{
+  border-color:var(--accent-2);
+  color:var(--accent-2);
 }
 
 .photo img{
@@ -424,6 +469,10 @@ textarea{ resize:vertical; min-height:92px; }
   background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 94%,transparent) 18%,var(--bg));
 }
 
+body.input-focused .bar{
+  display:none;
+}
+
 .btn{
   min-height:52px;
   border-radius:16px;
@@ -463,7 +512,6 @@ textarea{ resize:vertical; min-height:92px; }
         <div class="brand-title">LOFT HALL · Отчёт менеджера</div>
         <div class="brand-sub" id="stepLabel">Выбор отчёта</div>
       </div>
-      <button class="theme-btn" id="themeBtn" type="button" aria-label="Переключить тему">◐</button>
     </div>
     <div class="progress"><span id="progressBar"></span></div>
   </header>
@@ -472,20 +520,16 @@ textarea{ resize:vertical; min-height:92px; }
     <section class="screen active" data-screen="0">
       <div class="stack">
         <div class="panel">
-          <h1 class="section-title">Что отправляем?</h1>
-          <p class="section-note">Выберите тип отчёта. Для ивента будет полная структура служб, для дегустации короткая форма с фото.</p>
+          <h1 class="section-title">Выберите тип отчёта</h1>
           <div class="choice-grid">
             <button class="type-card active" type="button" data-report-type="event">
               <div class="type-name">Ивент</div>
-              <div class="type-note">Паспорт, службы, ABOUT THE EVENT, фото и итоговая проверка.</div>
             </button>
             <button class="type-card" type="button" data-report-type="tasting">
               <div class="type-name">Дегустация</div>
-              <div class="type-note">Дата, ОП, ОР, мероприятие, зал, комментарии и фото.</div>
             </button>
           </div>
         </div>
-        <div class="notice">Черновик сохраняется автоматически. Фото не сохраняются в память телефона, их нужно будет выбрать заново после закрытия приложения.</div>
       </div>
     </section>
 
@@ -493,27 +537,27 @@ textarea{ resize:vertical; min-height:92px; }
       <div class="stack">
         <div class="panel" id="eventFields">
           <h2 class="section-title">Данные мероприятия</h2>
-          <div class="field"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"></div>
+          <div class="field" data-field="event.date"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"><div class="field-error"></div></div>
           <div class="field"><label class="label">Лофт</label><select class="select" id="loftSelect"></select></div>
-          <div class="field"><label class="label">Зал</label><input class="input" id="hallSearch" placeholder="Поиск зала"><div class="hall-list" id="hallList"></div><input class="input hidden" id="customHall" placeholder="Укажите зал вручную" data-bind="event.hall"></div>
-          <div class="field"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"></div>
-          <div class="field"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"></div>
-          <div class="field"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"></div>
-          <div class="field"><label class="label">Формат</label><div class="chips" id="formatChips"></div><input class="input hidden" id="customFormat" placeholder="Укажите формат"></div>
-          <div class="field"><label class="label">Менеджер ОП</label><input class="input" data-bind="event.opManager"></div>
-          <div class="field"><label class="label">Менеджер ОР</label><input class="input" data-bind="event.orManager"></div>
-          <div class="field"><label class="label">Контакт</label><select class="select" data-bind="event.contactType" id="contactType"></select><input class="input hidden" id="customContactType" placeholder="Укажите тип контакта" data-bind="event.customContactType"></div>
-          <div class="field"><label class="label">Имя / агентство / комментарий</label><input class="input" data-bind="event.contactComment" placeholder="Вера, Анастасия"></div>
-          <div class="field"><label class="label">Персонал сервиса</label><input class="input" data-bind="event.serviceStaff" placeholder="4 официанта"></div>
+          <div class="field" data-field="event.halls"><label class="label">Залы</label><div class="selected-line" id="selectedHalls"></div><input class="input" id="hallSearch" placeholder="Поиск по списку залов"><div class="hall-list" id="hallList"></div><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="event.eventType"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"><div class="field-error"></div></div>
+          <div class="field" data-field="event.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"><div class="field-error"></div></div>
+          <div class="field" data-field="event.guestCount"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"><div class="field-error"></div></div>
+          <div class="field" data-field="event.formats"><label class="label">Формат</label><div class="chips" id="formatChips"></div><input class="input hidden" id="customFormat" placeholder="Укажите формат"><div class="field-error"></div></div>
+          <div class="field" data-field="event.opManager"><label class="label">Менеджер ОП</label><input class="input" data-bind="event.opManager"><div class="field-error"></div></div>
+          <div class="field" data-field="event.orManager"><label class="label">Менеджер ОР</label><input class="input" data-bind="event.orManager"><div class="field-error"></div></div>
+          <div class="field" data-field="event.contactType"><label class="label">Кто был основным контактом</label><select class="select" data-bind="event.contactType" id="contactType"></select><input class="input hidden" id="customContactType" placeholder="Укажите роль контакта" data-bind="event.customContactType"><div class="field-error"></div></div>
+          <div class="field"><label class="label">Имя / агентство / комментарий</label><input class="input" data-bind="event.contactComment" placeholder="Вера, агентство..., заказчик Людмила"></div>
+          <div class="field"><label class="label">Команда сервиса</label><input class="input" data-bind="event.serviceStaff" placeholder="Например: 4 официанта, 1 гардероб"></div>
         </div>
 
         <div class="panel hidden" id="tastingFields">
           <h2 class="section-title">Дегустация</h2>
-          <div class="field"><label class="label">Дата</label><input class="input" type="date" data-bind="tasting.date"></div>
-          <div class="field"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"></div>
-          <div class="field"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"></div>
-          <div class="field"><label class="label">Название мероприятия</label><input class="input" data-bind="tasting.eventName" placeholder="Дегустация по мероприятию 20.07.2026"></div>
-          <div class="field"><label class="label">Зал</label><input class="input" data-bind="tasting.hall"></div>
+          <div class="field" data-field="tasting.date"><label class="label">Дата</label><input class="input" type="date" data-bind="tasting.date"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="tasting.eventName" placeholder="Дегустация по мероприятию 20.07.2026"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.hall"><label class="label">Зал</label><input class="input" data-bind="tasting.hall"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
         </div>
       </div>
@@ -547,12 +591,12 @@ textarea{ resize:vertical; min-height:92px; }
       <div class="stack">
         <div class="panel">
           <h2 class="section-title">Фотоотчёт</h2>
-          <p class="section-note">Загрузите фото с мероприятия. Фото будут отправлены в рабочую группу перед текстовым отчётом.</p>
+          <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их позже.</p>
           <label class="photo-drop">
             <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
-            <div class="photo-title">Добавить фото</div>
-            <div class="type-note">Минимум 1, максимум 30. Общие фото зала, сервировки, ключевых зон, бара, welcome-зоны и финального состояния.</div>
+            <div class="photo-title">Выбрать фотографии</div>
           </label>
+          <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии позже</button>
         </div>
         <div class="panel">
           <h2 class="section-title" id="photoCount">Фото: 0</h2>
@@ -611,6 +655,7 @@ const photoCount = document.getElementById('photoCount');
 const loftSelect = document.getElementById('loftSelect');
 const hallSearch = document.getElementById('hallSearch');
 const hallList = document.getElementById('hallList');
+const selectedHalls = document.getElementById('selectedHalls');
 const customHall = document.getElementById('customHall');
 const eventType = document.getElementById('eventType');
 const contactType = document.getElementById('contactType');
@@ -618,6 +663,7 @@ const customEventType = document.getElementById('customEventType');
 const customContactType = document.getElementById('customContactType');
 const formatChips = document.getElementById('formatChips');
 const customFormat = document.getElementById('customFormat');
+const photosLaterBtn = document.getElementById('photosLaterBtn');
 
 const DRAFT_KEY = 'loft_manager_report_draft_v1';
 const MAX_PHOTOS = 30;
@@ -671,6 +717,8 @@ function createInitialState(){
       date:today,
       loft:'LOFT#3',
       hall:'',
+      halls:[],
+      customHall:'',
       eventType:'',
       customEventType:'',
       eventName:'',
@@ -685,7 +733,8 @@ function createInitialState(){
     },
     tasting:{ date:today, opManager:'', orManager:'', eventName:'', hall:'', comments:'' },
     departments:Object.fromEntries(ALL_DEPARTMENTS.map(name => [name,{ status: OPTIONAL_DEPARTMENTS.includes(name) ? 'na' : '', comment:'' }])),
-    about:{ communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' }
+    about:{ communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' },
+    photosLater:false
   };
 }
 
@@ -700,7 +749,8 @@ function loadDraft(){
       event:{ ...base.event, ...(parsed.event || {}) },
       tasting:{ ...base.tasting, ...(parsed.tasting || {}) },
       departments:{ ...base.departments, ...(parsed.departments || {}) },
-      about:{ ...base.about, ...(parsed.about || {}) }
+      about:{ ...base.about, ...(parsed.about || {}) },
+      photosLater:Boolean(parsed.photosLater)
     };
   } catch {
     return null;
@@ -736,6 +786,22 @@ function showError(message){
 function clearError(){
   submitError.textContent = '';
   submitError.classList.remove('show');
+}
+
+function clearInvalidFields(){
+  document.querySelectorAll('.field.is-invalid').forEach(field => {
+    field.classList.remove('is-invalid');
+    const error = field.querySelector('.field-error');
+    if (error) error.textContent = '';
+  });
+}
+
+function markInvalid(path, message){
+  const field = document.querySelector(`[data-field="${path}"]`);
+  if (!field) return;
+  field.classList.add('is-invalid');
+  const error = field.querySelector('.field-error');
+  if (error) error.textContent = message;
 }
 
 function escapeHtml(value){
@@ -796,6 +862,7 @@ function renderBoundFields(){
   customContactType.classList.toggle('hidden', state.event.contactType !== 'Другое');
   customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
   customHall.classList.toggle('hidden', state.event.loft !== 'Другое');
+  hallSearch.classList.toggle('hidden', state.event.loft === 'Другое');
 }
 
 function renderTypes(){
@@ -807,10 +874,12 @@ function renderTypes(){
 function renderHalls(){
   const halls = [...(lofts[state.event.loft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
   const query = hallSearch.value.trim().toLowerCase();
+  const selected = getSelectedHalls();
   hallList.classList.toggle('hidden', state.event.loft === 'Другое');
+  selectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
   hallList.innerHTML = halls
     .filter(name => name.toLowerCase().includes(query))
-    .map(name => `<button class="hall-btn ${state.event.hall === name ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
+    .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
     .join('');
 }
 
@@ -841,6 +910,8 @@ function renderDepartments(){
 
 function renderPhotos(){
   photoCount.textContent = `Фото: ${photos.length}`;
+  photosLaterBtn.classList.toggle('active', state.photosLater);
+  photoInput.disabled = state.photosLater;
   photoGrid.innerHTML = photos.map((photo, index) => `
     <div class="photo">
       <img src="${photo.preview}" alt="Фото ${index + 1}">
@@ -853,7 +924,7 @@ function renderReview(){
   const payload = buildPayload();
   const rows = [];
   if (state.type === 'event') {
-    rows.push(['Дата', payload.event.date], ['Зал', payload.event.hall], ['Мероприятие', payload.event.eventName], ['Тип', payload.event.eventType], ['Формат', joinList(payload.event.formats)], ['Гостей', payload.event.guestCount], ['ОП', payload.event.opManager], ['ОР', payload.event.orManager]);
+    rows.push(['Дата', payload.event.date], ['Залы', payload.event.hall], ['Мероприятие', payload.event.eventName], ['Тип', payload.event.eventType], ['Формат', joinList(payload.event.formats)], ['Гостей', payload.event.guestCount], ['ОП', payload.event.opManager], ['ОР', payload.event.orManager]);
     const withIssues = ALL_DEPARTMENTS.filter(name => ['warning','critical'].includes(payload.departments[name]?.status));
     const ok = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'ok');
     const na = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'na');
@@ -864,7 +935,7 @@ function renderReview(){
   } else {
     rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Мероприятие', payload.tasting.eventName], ['Зал', payload.tasting.hall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
   }
-  rows.push(['Фото', `${photos.length} шт.`]);
+  rows.push(['Фото', state.photosLater ? 'Скинут позже' : `${photos.length} шт.`]);
 
   reviewEl.innerHTML = rows.map(([label,value]) => `<div class="review-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`).join('');
 }
@@ -873,9 +944,9 @@ function renderScreen(){
   const steps = getSteps();
   const currentScreen = steps[screenIndex];
   document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', Number(screen.dataset.screen) === currentScreen));
-  progressBar.style.width = `${Math.round(((screenIndex + 1) / steps.length) * 100)}%`;
+  progressBar.style.width = `${screenIndex === 0 ? 0 : Math.round((screenIndex / (steps.length - 1)) * 100)}%`;
   backBtn.disabled = screenIndex === 0;
-  nextBtn.textContent = screenIndex === steps.length - 1 ? 'Отправить' : 'Далее';
+  nextBtn.textContent = screenIndex === 0 ? 'Начать' : (screenIndex === steps.length - 1 ? 'Отправить' : 'Далее');
   stepLabel.textContent = ['Выбор отчёта','Данные','Службы','ABOUT THE EVENT','Фото','Проверка'][currentScreen];
   if (currentScreen === 5) renderReview();
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -895,15 +966,28 @@ function getResolvedFormats(){
   return selected;
 }
 
+function getSelectedHalls(){
+  if (state.event.loft === 'Другое') {
+    return cleanText(state.event.customHall)
+      .split(',')
+      .map(cleanText)
+      .filter(Boolean);
+  }
+  return Array.isArray(state.event.halls) ? state.event.halls.map(cleanText).filter(Boolean) : [];
+}
+
 function buildPayload(){
   if (state.type === 'tasting') {
-    return { type:'tasting', tasting:{ ...state.tasting } };
+    return { type:'tasting', tasting:{ ...state.tasting }, photosLater:state.photosLater };
   }
+  const selectedHallsValue = getSelectedHalls();
   return {
     type:'event',
+    photosLater:state.photosLater,
     event:{
       ...state.event,
-      hall: state.event.loft === 'Другое' ? state.event.hall : state.event.hall,
+      halls:selectedHallsValue,
+      hall:joinList(selectedHallsValue),
       eventType:getResolvedEventType(),
       contactType:getResolvedContactType(),
       formats:getResolvedFormats()
@@ -917,26 +1001,40 @@ function requireText(value, message){
   if (!cleanText(value)) throw new Error(message);
 }
 
+function requireField(path, value, message){
+  if (!cleanText(value)) {
+    markInvalid(path, message);
+    throw new Error(message);
+  }
+}
+
 function validateCurrentScreen(){
+  clearInvalidFields();
   const screen = getSteps()[screenIndex];
   const payload = buildPayload();
   if (screen === 1 && state.type === 'event') {
-    requireText(payload.event.date, 'Укажите дату.');
-    requireText(payload.event.hall, 'Укажите зал.');
-    requireText(payload.event.eventType, 'Укажите тип мероприятия.');
-    requireText(payload.event.eventName, 'Укажите название мероприятия.');
-    requireText(payload.event.guestCount, 'Укажите количество гостей.');
-    if (!payload.event.formats.length) throw new Error('Выберите формат мероприятия.');
-    requireText(payload.event.opManager, 'Укажите менеджера ОП.');
-    requireText(payload.event.orManager, 'Укажите менеджера ОР.');
-    requireText(payload.event.contactType, 'Укажите организатора / заказчика.');
+    requireField('event.date', payload.event.date, 'Укажите дату.');
+    if (!payload.event.halls.length) {
+      markInvalid('event.halls', 'Выберите один или несколько залов.');
+      throw new Error('Выберите один или несколько залов.');
+    }
+    requireField('event.eventType', payload.event.eventType, 'Укажите тип мероприятия.');
+    requireField('event.eventName', payload.event.eventName, 'Укажите название мероприятия.');
+    requireField('event.guestCount', payload.event.guestCount, 'Укажите количество гостей.');
+    if (!payload.event.formats.length) {
+      markInvalid('event.formats', 'Выберите формат мероприятия.');
+      throw new Error('Выберите формат мероприятия.');
+    }
+    requireField('event.opManager', payload.event.opManager, 'Укажите менеджера ОП.');
+    requireField('event.orManager', payload.event.orManager, 'Укажите менеджера ОР.');
+    requireField('event.contactType', payload.event.contactType, 'Укажите основной контакт.');
   }
   if (screen === 1 && state.type === 'tasting') {
-    requireText(payload.tasting.date, 'Укажите дату.');
-    requireText(payload.tasting.opManager, 'Укажите ОП.');
-    requireText(payload.tasting.orManager, 'Укажите ОР.');
-    requireText(payload.tasting.eventName, 'Укажите название мероприятия.');
-    requireText(payload.tasting.hall, 'Укажите зал.');
+    requireField('tasting.date', payload.tasting.date, 'Укажите дату.');
+    requireField('tasting.opManager', payload.tasting.opManager, 'Укажите ОП.');
+    requireField('tasting.orManager', payload.tasting.orManager, 'Укажите ОР.');
+    requireField('tasting.eventName', payload.tasting.eventName, 'Укажите название мероприятия.');
+    requireField('tasting.hall', payload.tasting.hall, 'Укажите зал.');
   }
   if (screen === 2) {
     for (const name of REQUIRED_DEPARTMENTS) {
@@ -952,7 +1050,7 @@ function validateCurrentScreen(){
   }
   if (screen === 3 && !buildAboutText(state.about)) throw new Error('Заполните хотя бы одно поле ABOUT THE EVENT.');
   if (screen === 4) {
-    if (!photos.length) throw new Error('Добавьте хотя бы одно фото с мероприятия.');
+    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии позже».');
     if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
   }
 }
@@ -981,6 +1079,8 @@ async function addPhotos(fileList){
     return;
   }
   clearError();
+  state.photosLater = false;
+  saveDraft();
   for (const file of incoming) {
     if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name) && !['image/jpeg','image/png','image/webp','image/heic','image/heif'].includes(file.type)) {
       showError('Фото должны быть в формате jpg, jpeg, png, webp, heic или heif.');
@@ -1028,9 +1128,19 @@ document.addEventListener('input', event => {
   if (!input) return;
   pathSet(input.dataset.bind, input.value);
   renderBoundFields();
+  renderHalls();
+  clearInvalidFields();
 });
 
-document.addEventListener('focusin', clearError);
+document.addEventListener('focusin', event => {
+  clearError();
+  if (event.target.matches('input, textarea, select')) document.body.classList.add('input-focused');
+});
+document.addEventListener('focusout', () => {
+  setTimeout(() => {
+    if (!document.activeElement?.matches?.('input, textarea, select')) document.body.classList.remove('input-focused');
+  }, 80);
+});
 document.addEventListener('pointerdown', event => {
   if (!event.target.closest('input, textarea, select')) document.activeElement?.blur?.();
 }, true);
@@ -1047,6 +1157,8 @@ document.querySelectorAll('[data-report-type]').forEach(button => {
 loftSelect.addEventListener('change', () => {
   state.event.loft = loftSelect.value;
   state.event.hall = '';
+  state.event.halls = [];
+  state.event.customHall = '';
   hallSearch.value = '';
   saveDraft();
   renderBoundFields();
@@ -1057,7 +1169,11 @@ hallSearch.addEventListener('input', renderHalls);
 hallList.addEventListener('click', event => {
   const button = event.target.closest('[data-hall]');
   if (!button) return;
-  state.event.hall = button.dataset.hall;
+  const hall = button.dataset.hall;
+  state.event.halls = state.event.halls.includes(hall)
+    ? state.event.halls.filter(item => item !== hall)
+    : [...state.event.halls, hall];
+  state.event.hall = joinList(state.event.halls);
   saveDraft();
   renderHalls();
 });
@@ -1110,8 +1226,14 @@ photoGrid.addEventListener('click', event => {
   renderPhotos();
 });
 
-document.getElementById('themeBtn').addEventListener('click', () => {
-  document.body.classList.toggle('dark');
+photosLaterBtn.addEventListener('click', () => {
+  state.photosLater = !state.photosLater;
+  if (state.photosLater) {
+    photos.forEach(photo => URL.revokeObjectURL(photo.preview));
+    photos = [];
+  }
+  saveDraft();
+  renderPhotos();
 });
 
 backBtn.addEventListener('click', () => {
