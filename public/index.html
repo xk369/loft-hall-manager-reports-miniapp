@@ -62,6 +62,7 @@ body{
 button,input,select,textarea{ font:inherit; }
 button{ border:0; color:inherit; }
 textarea{ resize:vertical; min-height:92px; }
+.textarea.compact{ min-height:112px; }
 
 .app{
   width:min(100%,480px);
@@ -668,9 +669,10 @@ body.input-focused .bar{
           <div class="field" data-field="tasting.date"><label class="label">Дата</label><input class="input" type="date" data-bind="tasting.date"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
-          <div class="field" data-field="tasting.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="tasting.eventName" placeholder="Дегустация по мероприятию 20.07.2026"><div class="field-error"></div></div>
-          <div class="field" data-field="tasting.hall"><label class="label">Зал</label><input class="input" data-bind="tasting.hall"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.eventDate"><label class="label">Дата мероприятия</label><input class="input" type="date" data-bind="tasting.eventDate"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.eventHall"><label class="label">Зал мероприятия</label><input class="input" data-bind="tasting.eventHall" placeholder="Например: GRACE"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
+          <div id="tastingPhotoMount"></div>
         </div>
       </div>
     </section>
@@ -685,27 +687,30 @@ body.input-focused .bar{
 
         <div class="panel" id="eventAboutPanel">
           <h2 class="section-title">ABOUT THE EVENT</h2>
-          <p class="section-note">Коротко опишите ход мероприятия, коммуникацию, обратную связь и важные детали для команды.</p>
           <div class="field" data-field="about.summary">
             <label class="label">Комментарий по мероприятию</label>
-            <textarea class="textarea" data-bind="about.summary" placeholder="Что важно знать по мероприятию: как прошло, были ли сложности, что передали заказчику, что учесть в будущем."></textarea>
+            <textarea class="textarea compact" data-bind="about.summary"></textarea>
             <div class="field-error"></div>
           </div>
         </div>
 
-        <div class="panel">
-          <h2 class="section-title">Фотоотчёт</h2>
-          <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их отдельно.</p>
-          <div class="photo-actions">
-            <button class="photo-pick-btn" id="photoPickBtn" type="button">Выбрать фотографии</button>
-            <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии отдельно в группу</button>
-          </div>
-          <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
-        </div>
+        <div id="eventPhotoMount">
+          <div id="photoSection">
+            <div class="panel">
+              <h2 class="section-title">Фотоотчёт</h2>
+              <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их отдельно.</p>
+              <div class="photo-actions">
+                <button class="photo-pick-btn" id="photoPickBtn" type="button">Выбрать фотографии</button>
+                <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии отдельно в группу</button>
+              </div>
+              <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
+            </div>
 
-        <div class="panel">
-          <h2 class="section-title" id="photoCount">Фото: 0</h2>
-          <div class="photo-grid" id="photoGrid"></div>
+            <div class="panel">
+              <h2 class="section-title" id="photoCount">Фото: 0</h2>
+              <div class="photo-grid" id="photoGrid"></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -760,6 +765,9 @@ const photoInput = document.getElementById('photoInput');
 const photoGrid = document.getElementById('photoGrid');
 const photoCount = document.getElementById('photoCount');
 const photoPickBtn = document.getElementById('photoPickBtn');
+const photoSection = document.getElementById('photoSection');
+const eventPhotoMount = document.getElementById('eventPhotoMount');
+const tastingPhotoMount = document.getElementById('tastingPhotoMount');
 const loftSelect = document.getElementById('loftSelect');
 const hallSearch = document.getElementById('hallSearch');
 const hallList = document.getElementById('hallList');
@@ -776,7 +784,7 @@ const photosLaterBtn = document.getElementById('photosLaterBtn');
 const DRAFT_KEY = 'loft_manager_report_draft_v1';
 const MAX_PHOTOS = 30;
 const EVENT_STEPS = [0,1,2,5];
-const TASTING_STEPS = [0,1,2,5];
+const TASTING_STEPS = [0,1,5];
 
 const lofts = {
   'LOFT#1':['AVANTAGE','CHATEAU','LOSK','ROYAL BLANC'],
@@ -791,9 +799,9 @@ const lofts = {
   'Другое':[]
 };
 
-const eventTypes = ['Свадьба','Корпоратив','День рождения','Выпускной','Конференция','Гала-ужин','Деловое мероприятие','Другое'];
-const formats = ['Банкет','Фуршет','Бизнес','Кофе-брейк','Welcome','Анимации','Выездной кейтеринг','Другое'];
-const contactTypes = ['Организатор','Заказчик','Организатор и заказчик','Координатор','Декоратор','Другое'];
+const eventTypes = ['Свадьба','Корпоратив','День рождения','Выпускной','Конференция','Деловое мероприятие','Другое'];
+const formats = ['Банкет','Фуршет','Кофе-брейк','Выездной кейтеринг','Другое'];
+const contactTypes = ['Организатор','Заказчик','Координатор'];
 const statusOptions = [
   ['ok','🟢 Без замечаний'],
   ['warning','🟡 Есть замечания'],
@@ -839,7 +847,7 @@ function createInitialState(){
       contactComment:'',
       serviceStaff:''
     },
-    tasting:{ date:today, opManager:'', orManager:'', eventName:'', hall:'', comments:'' },
+    tasting:{ date:today, opManager:'', orManager:'', eventDate:'', eventHall:'', eventName:'', hall:'', comments:'' },
     departments:Object.fromEntries(ALL_DEPARTMENTS.map(name => [name,{ status: OPTIONAL_DEPARTMENTS.includes(name) ? 'na' : '', comment:'' }])),
     about:{ summary:'', communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' },
     photosLater:false
@@ -969,8 +977,12 @@ function renderBoundFields(){
   departmentsPanel.classList.toggle('hidden', state.type !== 'event');
   departmentsEl.classList.toggle('hidden', state.type !== 'event');
   eventAboutPanel.classList.toggle('hidden', state.type !== 'event');
+  const targetPhotoMount = state.type === 'tasting' ? tastingPhotoMount : eventPhotoMount;
+  if (targetPhotoMount && photoSection.parentElement !== targetPhotoMount) {
+    targetPhotoMount.appendChild(photoSection);
+  }
   customEventType.classList.toggle('hidden', state.event.eventType !== 'Другое');
-  customContactType.classList.toggle('hidden', state.event.contactType !== 'Другое');
+  customContactType.classList.add('hidden');
   customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
   customHall.classList.toggle('hidden', state.event.loft !== 'Другое');
   hallSearch.classList.toggle('hidden', state.event.loft === 'Другое');
@@ -1047,7 +1059,7 @@ function renderReview(){
     rows.push(['Не применимо', na.join(', ') || 'Нет']);
     rows.push(['ABOUT', buildAboutText(payload.about) || 'Не заполнено']);
   } else {
-    rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Мероприятие', payload.tasting.eventName], ['Зал', payload.tasting.hall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
+    rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Дата мероприятия', payload.tasting.eventDate], ['Зал мероприятия', payload.tasting.eventHall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
   }
   rows.push(['Фото', state.photosLater ? 'Скинут отдельно в группу' : `${photos.length} шт.`]);
 
@@ -1067,15 +1079,16 @@ function renderScreen(){
 }
 
 function getResolvedEventType(){
-  return state.event.eventType === 'Другое' ? state.event.customEventType : state.event.eventType;
+  if (state.event.eventType === 'Другое') return state.event.customEventType;
+  return eventTypes.includes(state.event.eventType) ? state.event.eventType : '';
 }
 
 function getResolvedContactType(){
-  return state.event.contactType === 'Другое' ? state.event.customContactType : state.event.contactType;
+  return contactTypes.includes(state.event.contactType) ? state.event.contactType : '';
 }
 
 function getResolvedFormats(){
-  const selected = state.event.formats.filter(name => name !== 'Другое');
+  const selected = state.event.formats.filter(name => name !== 'Другое' && formats.includes(name));
   if (state.event.formats.includes('Другое') && cleanText(customFormat.value)) selected.push(cleanText(customFormat.value));
   return selected;
 }
@@ -1092,7 +1105,15 @@ function getSelectedHalls(){
 
 function buildPayload(){
   if (state.type === 'tasting') {
-    return { type:'tasting', tasting:{ ...state.tasting }, photosLater:state.photosLater };
+    return {
+      type:'tasting',
+      tasting:{
+        ...state.tasting,
+        eventName:`Дегустация по мероприятию ${state.tasting.eventDate || ''} ${state.tasting.eventHall || ''}`.trim(),
+        hall:state.tasting.eventHall
+      },
+      photosLater:state.photosLater
+    };
   }
   const selectedHallsValue = getSelectedHalls();
   return {
@@ -1147,8 +1168,10 @@ function validateCurrentScreen(){
     requireField('tasting.date', payload.tasting.date, 'Укажите дату.');
     requireField('tasting.opManager', payload.tasting.opManager, 'Укажите ОП.');
     requireField('tasting.orManager', payload.tasting.orManager, 'Укажите ОР.');
-    requireField('tasting.eventName', payload.tasting.eventName, 'Укажите название мероприятия.');
-    requireField('tasting.hall', payload.tasting.hall, 'Укажите зал.');
+    requireField('tasting.eventDate', payload.tasting.eventDate, 'Укажите дату мероприятия.');
+    requireField('tasting.eventHall', payload.tasting.eventHall, 'Укажите зал мероприятия.');
+    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии отдельно в группу».');
+    if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
   }
   if (screen === 2) {
     if (state.type === 'event') {

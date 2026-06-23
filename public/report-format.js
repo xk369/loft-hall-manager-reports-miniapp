@@ -121,14 +121,18 @@ export function formatEventReport(payload, photoCount = 0) {
 
 export function formatTastingReport(payload, photoCount = 0) {
   const tasting = payload?.tasting || {};
+  const eventDate = formatDate(tasting.eventDate);
+  const eventHall = cleanText(tasting.eventHall || tasting.hall);
+  const eventDescription = eventDate || eventHall
+    ? cleanText(`Дегустация по мероприятию ${eventDate} ${eventHall}`)
+    : cleanText(tasting.eventName);
   return [
     'LOFT HALL · ОТЧЁТ ПО ДЕГУСТАЦИИ',
     '',
     `Дата: ${formatDate(tasting.date)}`,
     `ОП: ${cleanText(tasting.opManager)}`,
     `ОР: ${cleanText(tasting.orManager)}`,
-    `Название мероприятия: ${cleanText(tasting.eventName)}`,
-    `Зал: ${cleanText(tasting.hall)}`,
+    eventDescription,
     `Комментарии: ${cleanText(tasting.comments) || 'Без комментариев.'}`,
     '',
     '━━━━━━━━━━━━━━━',

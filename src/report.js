@@ -31,9 +31,9 @@ function assertRequired(value, message) {
   if (!cleanText(value)) throw new Error(message);
 }
 
-function assertValidDate(value) {
+function assertValidDate(value, message = 'Укажите дату отчёта.') {
   const text = cleanText(value);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) throw new Error('Укажите дату отчёта.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) throw new Error(message);
 }
 
 function assertPhotoFiles(photos) {
@@ -116,8 +116,8 @@ export function validateTastingPayload(payload) {
   assertValidDate(tasting.date);
   assertRequired(tasting.opManager, 'Укажите ОП.');
   assertRequired(tasting.orManager, 'Укажите ОР.');
-  assertRequired(tasting.eventName, 'Укажите название мероприятия.');
-  assertRequired(tasting.hall, 'Укажите зал.');
+  assertValidDate(tasting.eventDate, 'Укажите дату мероприятия.');
+  assertRequired(tasting.eventHall || tasting.hall, 'Укажите зал мероприятия.');
 }
 
 export function buildReportText(payload, photoCount) {
