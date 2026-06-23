@@ -107,7 +107,7 @@ export function validateEventPayload(payload) {
   }
 
   if (!buildAboutText(payload.about)) {
-    throw new Error('Заполните хотя бы одно поле ABOUT THE EVENT.');
+    throw new Error('Заполните комментарий по мероприятию.');
   }
 }
 

@@ -7,22 +7,43 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
-  --bg:#090a0d;
-  --ink:#f7f8fb;
-  --muted:#9198a6;
-  --muted-2:#687080;
-  --panel:#13161d;
-  --panel-2:#191d26;
-  --field:#1d222d;
-  --line:rgba(255,255,255,.095);
-  --line-strong:rgba(255,255,255,.16);
-  --accent:#8fc8ff;
-  --mint:#62d7c4;
-  --danger:#ff697c;
-  --warning:#f1c86c;
-  --success:#65d69a;
-  --shadow:0 18px 48px rgba(0,0,0,.30);
-  --radius:18px;
+  color-scheme:light dark;
+  --bg:#f5f5f7;
+  --ink:#111116;
+  --muted:#6f7078;
+  --muted-2:#8b8d96;
+  --panel:rgba(255,255,255,.88);
+  --panel-2:#ffffff;
+  --field:rgba(245,245,247,.92);
+  --line:rgba(17,17,22,.09);
+  --line-strong:rgba(17,17,22,.14);
+  --accent:#6d5dfc;
+  --mint:#45c0a7;
+  --danger:#c74444;
+  --warning:#b58124;
+  --success:#16865d;
+  --shadow:0 18px 55px rgba(13,13,18,.08);
+  --radius:24px;
+}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0b0b0e;
+    --ink:#f5f5f7;
+    --muted:#9b9ca5;
+    --muted-2:#747682;
+    --panel:rgba(23,23,28,.88);
+    --panel-2:#17171c;
+    --field:rgba(31,31,38,.92);
+    --line:rgba(255,255,255,.09);
+    --line-strong:rgba(255,255,255,.14);
+    --accent:#8b7cff;
+    --mint:#45c995;
+    --danger:#ff7979;
+    --warning:#f0c46f;
+    --success:#45c995;
+    --shadow:0 22px 65px rgba(0,0,0,.34);
+  }
 }
 
 *{ box-sizing:border-box; }
@@ -31,8 +52,8 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   background:
-    radial-gradient(circle at 50% -18%, rgba(143,200,255,.18), transparent 30%),
-    linear-gradient(180deg,#07080b 0%, #10131a 45%, #0b0d12 100%);
+    radial-gradient(circle at 55% 0%, color-mix(in srgb,var(--accent) 16%, transparent), transparent 42%),
+    var(--bg);
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
@@ -56,7 +77,7 @@ textarea{ resize:vertical; min-height:92px; }
   top:0;
   z-index:20;
   padding:max(14px,env(safe-area-inset-top)) 18px 14px;
-  background:linear-gradient(180deg,rgba(7,8,11,.98),rgba(7,8,11,.86));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 96%,transparent),color-mix(in srgb,var(--bg) 84%,transparent));
   backdrop-filter:blur(20px) saturate(1.08);
   border-bottom:1px solid var(--line);
 }
@@ -95,7 +116,7 @@ textarea{ resize:vertical; min-height:92px; }
   height:100%;
   width:0;
   border-radius:inherit;
-  background:linear-gradient(90deg,var(--accent),var(--mint));
+  background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 58%,var(--mint)));
   transition:width 240ms ease;
 }
 
@@ -160,7 +181,7 @@ textarea{ resize:vertical; min-height:92px; }
   padding:20px;
   border:1px solid var(--line-strong);
   background:
-    linear-gradient(135deg, rgba(143,200,255,.10), transparent 42%),
+    linear-gradient(135deg, color-mix(in srgb,var(--accent) 12%,transparent), transparent 48%),
     var(--panel);
   box-shadow:var(--shadow);
   display:flex;
@@ -184,12 +205,12 @@ textarea{ resize:vertical; min-height:92px; }
   outline:none;
   border-color:color-mix(in srgb,var(--accent) 58%,var(--line));
   background:
-    linear-gradient(135deg, rgba(143,200,255,.18), rgba(98,215,196,.08) 52%, transparent),
+    linear-gradient(135deg, color-mix(in srgb,var(--accent) 18%,transparent), color-mix(in srgb,var(--mint) 8%,transparent) 54%, transparent),
     var(--panel);
 }
 .type-card.active::after{
   border-color:transparent;
-  background:linear-gradient(135deg,var(--accent),var(--mint));
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--mint)));
   box-shadow:0 0 0 4px rgba(143,200,255,.10);
 }
 
@@ -343,11 +364,11 @@ input[type="date"]{
 
 .dept-card{
   border:1px solid var(--line);
-  border-radius:22px;
+  border-radius:var(--radius);
   background:
     linear-gradient(180deg, rgba(255,255,255,.028), transparent),
     var(--panel);
-  padding:15px;
+  padding:16px;
   display:grid;
   gap:12px;
 }
@@ -374,10 +395,10 @@ input[type="date"]{
 .status-row{
   display:grid;
   grid-template-columns:repeat(3, minmax(0,1fr));
-  gap:6px;
-  padding:4px;
-  border-radius:17px;
-  background:rgba(255,255,255,.032);
+  gap:7px;
+  padding:5px;
+  border-radius:18px;
+  background:color-mix(in srgb,var(--field) 74%,transparent);
   border:1px solid var(--line);
 }
 
@@ -386,8 +407,8 @@ input[type="date"]{
 }
 
 .status-btn{
-  min-height:48px;
-  border-radius:13px;
+  min-height:50px;
+  border-radius:14px;
   padding:8px 7px;
   background:transparent;
   border:1px solid transparent;
@@ -407,6 +428,10 @@ input[type="date"]{
 .status-btn.active[data-status="warning"]{ border-color:var(--warning); color:var(--warning); }
 .status-btn.active[data-status="critical"]{ border-color:var(--danger); color:var(--danger); }
 .status-btn.active[data-status="na"]{ border-color:var(--muted); color:var(--muted); }
+.status-btn.active{
+  background:var(--panel);
+  box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
 
 .photo-actions{
   display:grid;
@@ -417,7 +442,7 @@ input[type="date"]{
   width:100%;
   border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));
   border-radius:22px;
-  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--panel)),color-mix(in srgb,var(--mint) 10%,var(--panel)));
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--panel)),color-mix(in srgb,var(--accent) 8%,var(--panel)));
   padding:20px 18px;
   text-align:center;
   font-weight:900;
@@ -551,7 +576,7 @@ input[type="date"]{
   grid-template-columns:1fr 1fr;
   gap:10px;
   padding:10px 14px max(10px,env(safe-area-inset-bottom));
-  background:linear-gradient(180deg,transparent,rgba(7,8,11,.92) 18%,#07080b);
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 92%,transparent) 18%,var(--bg));
 }
 
 body.input-focused .bar{
@@ -568,7 +593,7 @@ body.input-focused .bar{
 }
 
 .btn.primary{
-  background:linear-gradient(135deg,var(--accent),var(--mint));
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--mint)));
   border-color:transparent;
   color:#fff;
 }
@@ -652,39 +677,32 @@ body.input-focused .bar{
 
     <section class="screen" data-screen="2">
       <div class="stack">
-        <div class="panel">
+        <div class="panel" id="departmentsPanel">
           <h2 class="section-title">Оценка служб</h2>
           <p class="section-note">Для жёлтых и красных статусов комментарий обязателен. BAR и HOOKAH можно отметить как не применимо.</p>
         </div>
         <div id="departments"></div>
-      </div>
-    </section>
 
-    <section class="screen" data-screen="3">
-      <div class="stack">
-        <div class="panel">
+        <div class="panel" id="eventAboutPanel">
           <h2 class="section-title">ABOUT THE EVENT</h2>
-          <p class="section-note">Заполните хотя бы одно поле. В итоговом отчёте они объединятся в один аккуратный блок.</p>
-          <div class="field"><label class="label">Коммуникация с организатором / заказчиком</label><textarea class="textarea" data-bind="about.communication" placeholder="С кем велась коммуникация, были ли сложности, кто принимал решения."></textarea></div>
-          <div class="field"><label class="label">Ход мероприятия</label><textarea class="textarea" data-bind="about.eventFlow" placeholder="Штатно ли прошло мероприятие, были ли сдвиги или изменения."></textarea></div>
-          <div class="field"><label class="label">Обратная связь гостей / заказчика</label><textarea class="textarea" data-bind="about.feedback"></textarea></div>
-          <div class="field"><label class="label">Остатки еды и алкоголя</label><textarea class="textarea" data-bind="about.leftovers"></textarea></div>
-          <div class="field"><label class="label">Что важно учесть в будущем</label><textarea class="textarea" data-bind="about.futureNotes"></textarea></div>
+          <p class="section-note">Коротко опишите ход мероприятия, коммуникацию, обратную связь и важные детали для команды.</p>
+          <div class="field" data-field="about.summary">
+            <label class="label">Комментарий по мероприятию</label>
+            <textarea class="textarea" data-bind="about.summary" placeholder="Что важно знать по мероприятию: как прошло, были ли сложности, что передали заказчику, что учесть в будущем."></textarea>
+            <div class="field-error"></div>
+          </div>
         </div>
-      </div>
-    </section>
 
-    <section class="screen" data-screen="4">
-      <div class="stack">
         <div class="panel">
           <h2 class="section-title">Фотоотчёт</h2>
-          <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их позже.</p>
+          <p class="section-note">Выберите все фотографии одним действием или отметьте, что отправите их отдельно.</p>
           <div class="photo-actions">
             <button class="photo-pick-btn" id="photoPickBtn" type="button">Выбрать фотографии</button>
-            <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии позже</button>
+            <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии отдельно в группу</button>
           </div>
           <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
         </div>
+
         <div class="panel">
           <h2 class="section-title" id="photoCount">Фото: 0</h2>
           <div class="photo-grid" id="photoGrid"></div>
@@ -734,7 +752,9 @@ const nextBtn = document.getElementById('nextBtn');
 const submitError = document.getElementById('formError');
 const eventFields = document.getElementById('eventFields');
 const tastingFields = document.getElementById('tastingFields');
+const departmentsPanel = document.getElementById('departmentsPanel');
 const departmentsEl = document.getElementById('departments');
+const eventAboutPanel = document.getElementById('eventAboutPanel');
 const reviewEl = document.getElementById('review');
 const photoInput = document.getElementById('photoInput');
 const photoGrid = document.getElementById('photoGrid');
@@ -755,12 +775,12 @@ const photosLaterBtn = document.getElementById('photosLaterBtn');
 
 const DRAFT_KEY = 'loft_manager_report_draft_v1';
 const MAX_PHOTOS = 30;
-const EVENT_STEPS = [0,1,2,3,4,5];
-const TASTING_STEPS = [0,1,4,5];
+const EVENT_STEPS = [0,1,2,5];
+const TASTING_STEPS = [0,1,2,5];
 
 const lofts = {
   'LOFT#1':['AVANTAGE','CHATEAU','LOSK','ROYAL BLANC'],
-  'LOFT#2':['BACKYARD',"ROCKEFELLER`S HALL","ROTSCHILD`S HALL"],
+  'LOFT#2':['BACKYARD',"Rt’s&Rc’s"],
   'LOFT#3':['BLADE','GRACE','GREENWICH','HOOKS','LOFT ANGELES','MONTBLANC HALL','OUTLOFT','RATUSHA HALL','SECRET','SKY','TOWN','WOOD'],
   'LOFT#4':['ANDY','BANKSY HALL','CINDY','ITTEN HALL','LONG HALL','MONDRIAN HALL','VILLA MR. PINKY'],
   'LOFT#5':['CONTRABANDA','SMALL'],
@@ -821,7 +841,7 @@ function createInitialState(){
     },
     tasting:{ date:today, opManager:'', orManager:'', eventName:'', hall:'', comments:'' },
     departments:Object.fromEntries(ALL_DEPARTMENTS.map(name => [name,{ status: OPTIONAL_DEPARTMENTS.includes(name) ? 'na' : '', comment:'' }])),
-    about:{ communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' },
+    about:{ summary:'', communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' },
     photosLater:false
   };
 }
@@ -946,6 +966,9 @@ function renderBoundFields(){
   });
   eventFields.classList.toggle('hidden', state.type !== 'event');
   tastingFields.classList.toggle('hidden', state.type !== 'tasting');
+  departmentsPanel.classList.toggle('hidden', state.type !== 'event');
+  departmentsEl.classList.toggle('hidden', state.type !== 'event');
+  eventAboutPanel.classList.toggle('hidden', state.type !== 'event');
   customEventType.classList.toggle('hidden', state.event.eventType !== 'Другое');
   customContactType.classList.toggle('hidden', state.event.contactType !== 'Другое');
   customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
@@ -1026,7 +1049,7 @@ function renderReview(){
   } else {
     rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Мероприятие', payload.tasting.eventName], ['Зал', payload.tasting.hall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
   }
-  rows.push(['Фото', state.photosLater ? 'Скинут позже' : `${photos.length} шт.`]);
+  rows.push(['Фото', state.photosLater ? 'Скинут отдельно в группу' : `${photos.length} шт.`]);
 
   reviewEl.innerHTML = rows.map(([label,value]) => `<div class="review-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`).join('');
 }
@@ -1038,7 +1061,7 @@ function renderScreen(){
   progressBar.style.width = `${screenIndex === 0 ? 0 : Math.round((screenIndex / (steps.length - 1)) * 100)}%`;
   backBtn.disabled = screenIndex === 0;
   nextBtn.textContent = screenIndex === 0 ? 'Начать' : (screenIndex === steps.length - 1 ? 'Отправить' : 'Далее');
-  stepLabel.textContent = ['Выбор отчёта','Данные','Службы','ABOUT THE EVENT','Фото','Проверка'][currentScreen];
+  stepLabel.textContent = ['Выбор отчёта','Данные','Детали','ABOUT THE EVENT','Фото','Проверка'][currentScreen];
   if (currentScreen === 5) renderReview();
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -1128,20 +1151,23 @@ function validateCurrentScreen(){
     requireField('tasting.hall', payload.tasting.hall, 'Укажите зал.');
   }
   if (screen === 2) {
-    for (const name of REQUIRED_DEPARTMENTS) {
-      const entry = state.departments[name];
-      if (!entry.status) throw new Error(`Выберите статус службы ${name}.`);
-      if (['warning','critical'].includes(entry.status)) requireText(entry.comment, `Добавьте комментарий к службе ${name}.`);
+    if (state.type === 'event') {
+      for (const name of REQUIRED_DEPARTMENTS) {
+        const entry = state.departments[name];
+        if (!entry.status) throw new Error(`Выберите статус службы ${name}.`);
+        if (['warning','critical'].includes(entry.status)) requireText(entry.comment, `Добавьте комментарий к службе ${name}.`);
+      }
+      for (const name of OPTIONAL_DEPARTMENTS) {
+        const entry = state.departments[name];
+        if (!entry.status) throw new Error(`Выберите статус службы ${name}.`);
+        if (['warning','critical'].includes(entry.status)) requireText(entry.comment, `Добавьте комментарий к службе ${name}.`);
+      }
+      if (!buildAboutText(state.about)) {
+        markInvalid('about.summary', 'Заполните комментарий по мероприятию.');
+        throw new Error('Заполните комментарий по мероприятию.');
+      }
     }
-    for (const name of OPTIONAL_DEPARTMENTS) {
-      const entry = state.departments[name];
-      if (!entry.status) throw new Error(`Выберите статус службы ${name}.`);
-      if (['warning','critical'].includes(entry.status)) requireText(entry.comment, `Добавьте комментарий к службе ${name}.`);
-    }
-  }
-  if (screen === 3 && !buildAboutText(state.about)) throw new Error('Заполните хотя бы одно поле ABOUT THE EVENT.');
-  if (screen === 4) {
-    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии позже».');
+    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии отдельно в группу».');
     if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
   }
 }

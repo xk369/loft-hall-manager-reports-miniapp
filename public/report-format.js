@@ -23,6 +23,16 @@ export function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
+export function cleanMultilineText(value) {
+  return String(value || '')
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map(line => cleanText(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export function formatDate(dateValue) {
   const value = cleanText(dateValue);
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -54,6 +64,9 @@ export function getDepartmentStatusText(entry = {}) {
 }
 
 export function buildAboutText(about = {}) {
+  const summary = cleanMultilineText(about.summary);
+  if (summary) return summary;
+
   return [
     about.communication,
     about.eventFlow,

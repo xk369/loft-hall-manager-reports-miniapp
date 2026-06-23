@@ -32,10 +32,11 @@ const eventPayload = {
     HOOKAH: { status: 'na', comment: '' }
   },
   about: {
-    communication: 'Коммуникация велась с координаторами.',
-    eventFlow: 'Мероприятие прошло штатно.',
+    summary: 'Коммуникация велась с координаторами.\n\nМероприятие прошло штатно.\n\nЕду и алкоголь передали паре.',
+    communication: '',
+    eventFlow: '',
     feedback: '',
-    leftovers: 'Еду и алкоголь передали паре.',
+    leftovers: '',
     futureNotes: ''
   }
 };
