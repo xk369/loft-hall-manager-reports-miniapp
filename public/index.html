@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>LOFT HALL · Отчёты менеджеров</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#ffffff;
+  --card-soft:#f0f2f5;
+  --text:#111318;
+  --muted:#6e7480;
+  --line:rgba(15,18,25,.10);
+  --accent:#1f6feb;
+  --accent-2:#0f9f7a;
+  --danger:#d92d20;
+  --warning:#b7791f;
+  --success:#16825d;
+  --shadow:0 12px 30px rgba(17,19,24,.08);
+  --radius:18px;
+}
+
+.dark{
+  --bg:#111317;
+  --card:#1b1e24;
+  --card-soft:#252932;
+  --text:#f4f6fb;
+  --muted:#a1a8b3;
+  --line:rgba(255,255,255,.10);
+  --accent:#67a7ff;
+  --accent-2:#4ed1ad;
+  --danger:#ff7b72;
+  --warning:#f2c36b;
+  --success:#59d39d;
+  --shadow:0 14px 36px rgba(0,0,0,.30);
+}
+
+*{ box-sizing:border-box; }
+html,body{ min-height:100%; }
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 92%,#dfe4ec));
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+button,input,select,textarea{ font:inherit; }
+button{ border:0; color:inherit; }
+textarea{ resize:vertical; min-height:92px; }
+
+.app{
+  width:min(100%,480px);
+  min-height:100vh;
+  min-height:100dvh;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+}
+
+.top{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:max(12px,env(safe-area-inset-top)) 14px 10px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 98%,transparent),color-mix(in srgb,var(--bg) 88%,transparent));
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.brand-title{
+  min-width:0;
+  font-weight:900;
+  letter-spacing:.02em;
+  font-size:17px;
+}
+
+.brand-sub{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.theme-btn{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+
+.progress{
+  height:6px;
+  border-radius:999px;
+  background:var(--card-soft);
+  overflow:hidden;
+}
+
+.progress span{
+  display:block;
+  height:100%;
+  width:0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  transition:width 240ms ease;
+}
+
+.screen{
+  flex:1;
+  padding:16px 14px calc(88px + env(safe-area-inset-bottom));
+  display:none;
+}
+
+.screen.active{ display:block; }
+
+.stack{ display:grid; gap:14px; }
+
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
+}
+
+.choice-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.type-card{
+  min-height:118px;
+  text-align:left;
+  border-radius:18px;
+  padding:16px;
+  border:1px solid var(--line);
+  background:var(--card);
+  box-shadow:var(--shadow);
+}
+
+.type-card.active{
+  outline:3px solid color-mix(in srgb,var(--accent) 24%,transparent);
+  border-color:color-mix(in srgb,var(--accent) 38%,var(--line));
+}
+
+.type-name{
+  font-size:20px;
+  font-weight:900;
+  line-height:1.08;
+}
+
+.type-note{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.35;
+}
+
+.section-title{
+  margin:0 0 10px;
+  font-size:22px;
+  line-height:1.12;
+  font-weight:900;
+  letter-spacing:-.02em;
+}
+
+.section-note{
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.45;
+  margin:0 0 14px;
+}
+
+.field{ display:grid; gap:7px; margin-top:12px; }
+.field:first-child{ margin-top:0; }
+.label{
+  font-size:13px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.input,.select,.textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--card-soft);
+  color:var(--text);
+  padding:13px 12px;
+  outline:none;
+}
+
+.input:focus,.select:focus,.textarea:focus{
+  border-color:color-mix(in srgb,var(--accent) 54%,var(--line));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent);
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.chip{
+  border-radius:999px;
+  padding:9px 12px;
+  background:var(--card-soft);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-size:13px;
+  font-weight:800;
+}
+
+.chip.active{
+  background:color-mix(in srgb,var(--accent) 14%,var(--card));
+  border-color:color-mix(in srgb,var(--accent) 38%,var(--line));
+  color:var(--accent);
+}
+
+.hall-list{
+  max-height:210px;
+  overflow:auto;
+  display:grid;
+  gap:7px;
+  padding:2px;
+}
+
+.hall-btn{
+  text-align:left;
+  border-radius:12px;
+  padding:10px 11px;
+  background:var(--card-soft);
+  border:1px solid var(--line);
+}
+.hall-btn.active{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.dept-card{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--card);
+  padding:14px;
+  display:grid;
+  gap:10px;
+}
+
+.dept-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.dept-name{
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.hint{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.38;
+}
+
+.status-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.status-btn{
+  min-height:42px;
+  border-radius:13px;
+  padding:8px 9px;
+  background:var(--card-soft);
+  border:1px solid var(--line);
+  font-size:13px;
+  font-weight:800;
+}
+.status-btn.active[data-status="ok"]{ border-color:var(--success); color:var(--success); }
+.status-btn.active[data-status="warning"]{ border-color:var(--warning); color:var(--warning); }
+.status-btn.active[data-status="critical"]{ border-color:var(--danger); color:var(--danger); }
+.status-btn.active[data-status="na"]{ border-color:var(--muted); color:var(--muted); }
+
+.photo-drop{
+  position:relative;
+  border:1px dashed color-mix(in srgb,var(--accent) 44%,var(--line));
+  border-radius:18px;
+  background:color-mix(in srgb,var(--accent) 6%,var(--card));
+  padding:18px;
+  text-align:center;
+}
+
+.photo-drop input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+}
+
+.photo-title{
+  font-weight:900;
+  font-size:17px;
+}
+
+.photo-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.photo{
+  position:relative;
+  aspect-ratio:1;
+  overflow:hidden;
+  border-radius:14px;
+  background:var(--card-soft);
+  border:1px solid var(--line);
+}
+
+.photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.photo button{
+  position:absolute;
+  right:5px;
+  top:5px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:rgba(0,0,0,.62);
+  color:white;
+}
+
+.review-block{
+  display:grid;
+  gap:9px;
+  font-size:14px;
+  line-height:1.42;
+}
+
+.review-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--line);
+}
+
+.review-row span:first-child{ color:var(--muted); }
+.review-row span:last-child{ text-align:right; font-weight:800; }
+
+.notice{
+  border-radius:16px;
+  padding:12px;
+  background:color-mix(in srgb,var(--accent) 8%,var(--card));
+  border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.45;
+}
+
+.error{
+  display:none;
+  border-radius:16px;
+  padding:12px;
+  background:color-mix(in srgb,var(--danger) 10%,var(--card));
+  border:1px solid color-mix(in srgb,var(--danger) 36%,var(--line));
+  color:var(--danger);
+  font-size:14px;
+  line-height:1.4;
+}
+.error.show{ display:block; }
+.global-error{
+  position:fixed;
+  left:50%;
+  bottom:calc(74px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  width:min(calc(100% - 28px),452px);
+  z-index:40;
+  box-shadow:var(--shadow);
+}
+
+.access{
+  min-height:100vh;
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:22px;
+}
+
+.access .panel{ width:min(100%,420px); text-align:center; }
+
+.bar{
+  position:fixed;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  width:min(100%,480px);
+  z-index:30;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:10px 14px max(10px,env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 94%,transparent) 18%,var(--bg));
+}
+
+.btn{
+  min-height:52px;
+  border-radius:16px;
+  font-weight:900;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  border-color:transparent;
+  color:#fff;
+}
+.btn:disabled{ opacity:.55; }
+
+.hidden{ display:none !important; }
+
+@media (max-width:370px){
+  .choice-grid,.status-row{ grid-template-columns:1fr; }
+  .photo-grid{ grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+<div id="access" class="access hidden">
+  <div class="panel">
+    <h1 class="section-title">Приложение доступно только через Telegram</h1>
+    <p class="section-note">Откройте отчёт из меню LOFT HALL.</p>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <header class="top">
+    <div class="brand">
+      <div>
+        <div class="brand-title">LOFT HALL · Отчёт менеджера</div>
+        <div class="brand-sub" id="stepLabel">Выбор отчёта</div>
+      </div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Переключить тему">◐</button>
+    </div>
+    <div class="progress"><span id="progressBar"></span></div>
+  </header>
+
+  <main>
+    <section class="screen active" data-screen="0">
+      <div class="stack">
+        <div class="panel">
+          <h1 class="section-title">Что отправляем?</h1>
+          <p class="section-note">Выберите тип отчёта. Для ивента будет полная структура служб, для дегустации короткая форма с фото.</p>
+          <div class="choice-grid">
+            <button class="type-card active" type="button" data-report-type="event">
+              <div class="type-name">Ивент</div>
+              <div class="type-note">Паспорт, службы, ABOUT THE EVENT, фото и итоговая проверка.</div>
+            </button>
+            <button class="type-card" type="button" data-report-type="tasting">
+              <div class="type-name">Дегустация</div>
+              <div class="type-note">Дата, ОП, ОР, мероприятие, зал, комментарии и фото.</div>
+            </button>
+          </div>
+        </div>
+        <div class="notice">Черновик сохраняется автоматически. Фото не сохраняются в память телефона, их нужно будет выбрать заново после закрытия приложения.</div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="1">
+      <div class="stack">
+        <div class="panel" id="eventFields">
+          <h2 class="section-title">Данные мероприятия</h2>
+          <div class="field"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"></div>
+          <div class="field"><label class="label">Лофт</label><select class="select" id="loftSelect"></select></div>
+          <div class="field"><label class="label">Зал</label><input class="input" id="hallSearch" placeholder="Поиск зала"><div class="hall-list" id="hallList"></div><input class="input hidden" id="customHall" placeholder="Укажите зал вручную" data-bind="event.hall"></div>
+          <div class="field"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"></div>
+          <div class="field"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"></div>
+          <div class="field"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"></div>
+          <div class="field"><label class="label">Формат</label><div class="chips" id="formatChips"></div><input class="input hidden" id="customFormat" placeholder="Укажите формат"></div>
+          <div class="field"><label class="label">Менеджер ОП</label><input class="input" data-bind="event.opManager"></div>
+          <div class="field"><label class="label">Менеджер ОР</label><input class="input" data-bind="event.orManager"></div>
+          <div class="field"><label class="label">Контакт</label><select class="select" data-bind="event.contactType" id="contactType"></select><input class="input hidden" id="customContactType" placeholder="Укажите тип контакта" data-bind="event.customContactType"></div>
+          <div class="field"><label class="label">Имя / агентство / комментарий</label><input class="input" data-bind="event.contactComment" placeholder="Вера, Анастасия"></div>
+          <div class="field"><label class="label">Персонал сервиса</label><input class="input" data-bind="event.serviceStaff" placeholder="4 официанта"></div>
+        </div>
+
+        <div class="panel hidden" id="tastingFields">
+          <h2 class="section-title">Дегустация</h2>
+          <div class="field"><label class="label">Дата</label><input class="input" type="date" data-bind="tasting.date"></div>
+          <div class="field"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"></div>
+          <div class="field"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"></div>
+          <div class="field"><label class="label">Название мероприятия</label><input class="input" data-bind="tasting.eventName" placeholder="Дегустация по мероприятию 20.07.2026"></div>
+          <div class="field"><label class="label">Зал</label><input class="input" data-bind="tasting.hall"></div>
+          <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="2">
+      <div class="stack">
+        <div class="panel">
+          <h2 class="section-title">Оценка служб</h2>
+          <p class="section-note">Для жёлтых и красных статусов комментарий обязателен. BAR и HOOKAH можно отметить как не применимо.</p>
+        </div>
+        <div id="departments"></div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="3">
+      <div class="stack">
+        <div class="panel">
+          <h2 class="section-title">ABOUT THE EVENT</h2>
+          <p class="section-note">Заполните хотя бы одно поле. В итоговом отчёте они объединятся в один аккуратный блок.</p>
+          <div class="field"><label class="label">Коммуникация с организатором / заказчиком</label><textarea class="textarea" data-bind="about.communication" placeholder="С кем велась коммуникация, были ли сложности, кто принимал решения."></textarea></div>
+          <div class="field"><label class="label">Ход мероприятия</label><textarea class="textarea" data-bind="about.eventFlow" placeholder="Штатно ли прошло мероприятие, были ли сдвиги или изменения."></textarea></div>
+          <div class="field"><label class="label">Обратная связь гостей / заказчика</label><textarea class="textarea" data-bind="about.feedback"></textarea></div>
+          <div class="field"><label class="label">Остатки еды и алкоголя</label><textarea class="textarea" data-bind="about.leftovers"></textarea></div>
+          <div class="field"><label class="label">Что важно учесть в будущем</label><textarea class="textarea" data-bind="about.futureNotes"></textarea></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="4">
+      <div class="stack">
+        <div class="panel">
+          <h2 class="section-title">Фотоотчёт</h2>
+          <p class="section-note">Загрузите фото с мероприятия. Фото будут отправлены в рабочую группу перед текстовым отчётом.</p>
+          <label class="photo-drop">
+            <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
+            <div class="photo-title">Добавить фото</div>
+            <div class="type-note">Минимум 1, максимум 30. Общие фото зала, сервировки, ключевых зон, бара, welcome-зоны и финального состояния.</div>
+          </label>
+        </div>
+        <div class="panel">
+          <h2 class="section-title" id="photoCount">Фото: 0</h2>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="5">
+      <div class="stack">
+        <div class="panel">
+          <h2 class="section-title">Проверка и отправка</h2>
+          <div class="review-block" id="review"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="error global-error" id="formError"></div>
+
+  <footer class="bar">
+    <button class="btn" id="backBtn" type="button">Назад</button>
+    <button class="btn primary" id="nextBtn" type="button">Далее</button>
+  </footer>
+</div>
+
+<script type="module">
+import {
+  ALL_DEPARTMENTS,
+  OPTIONAL_DEPARTMENTS,
+  REQUIRED_DEPARTMENTS,
+  buildAboutText,
+  cleanText,
+  formatEventReport,
+  formatTastingReport,
+  getDepartmentStatusText,
+  joinList
+} from './report-format.js';
+
+const tg = window.Telegram?.WebApp;
+const initData = tg?.initData || '';
+const access = document.getElementById('access');
+const app = document.getElementById('app');
+const progressBar = document.getElementById('progressBar');
+const stepLabel = document.getElementById('stepLabel');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+const submitError = document.getElementById('formError');
+const eventFields = document.getElementById('eventFields');
+const tastingFields = document.getElementById('tastingFields');
+const departmentsEl = document.getElementById('departments');
+const reviewEl = document.getElementById('review');
+const photoInput = document.getElementById('photoInput');
+const photoGrid = document.getElementById('photoGrid');
+const photoCount = document.getElementById('photoCount');
+const loftSelect = document.getElementById('loftSelect');
+const hallSearch = document.getElementById('hallSearch');
+const hallList = document.getElementById('hallList');
+const customHall = document.getElementById('customHall');
+const eventType = document.getElementById('eventType');
+const contactType = document.getElementById('contactType');
+const customEventType = document.getElementById('customEventType');
+const customContactType = document.getElementById('customContactType');
+const formatChips = document.getElementById('formatChips');
+const customFormat = document.getElementById('customFormat');
+
+const DRAFT_KEY = 'loft_manager_report_draft_v1';
+const MAX_PHOTOS = 30;
+const EVENT_STEPS = [0,1,2,3,4,5];
+const TASTING_STEPS = [0,1,4,5];
+
+const lofts = {
+  'LOFT#1':['AVANTAGE','CHATEAU','LOSK','ROYAL BLANC'],
+  'LOFT#2':['BACKYARD',"ROCKEFELLER`S HALL","ROTSCHILD`S HALL"],
+  'LOFT#3':['BLADE','GRACE','GREENWICH','HOOKS','LOFT ANGELES','MONTBLANC HALL','OUTLOFT','RATUSHA HALL','SECRET','SKY','TOWN','WOOD'],
+  'LOFT#4':['ANDY','BANKSY HALL','CINDY','ITTEN HALL','LONG HALL','MONDRIAN HALL','VILLA MR. PINKY'],
+  'LOFT#5':['CONTRABANDA','SMALL'],
+  'LOFT#8':['AXIOMA HALL','BROOK HALL','CRYSTALL HALL','MAIN HALL','MILINIS HALL','ROSEWOOD HALL','VECTOR HALL','WELCOME HALL'],
+  'LOFT#10':['MAIN HALL','WELCOME HALL'],
+  'The Birch':['AMBERWOOD HOUSE','BLACKWOOD HOUSE','MAHOGANY TERRACE','MANGO HOUSE','THE FIELD'],
+  'Вишневый сад':['CHEKHOV HALL','LEVITAN HALL'],
+  'Другое':[]
+};
+
+const eventTypes = ['Свадьба','Корпоратив','День рождения','Выпускной','Конференция','Гала-ужин','Деловое мероприятие','Другое'];
+const formats = ['Банкет','Фуршет','Бизнес','Кофе-брейк','Welcome','Анимации','Выездной кейтеринг','Другое'];
+const contactTypes = ['Организатор','Заказчик','Организатор и заказчик','Координатор','Декоратор','Другое'];
+const statusOptions = [
+  ['ok','🟢 Без замечаний'],
+  ['warning','🟡 Есть замечания'],
+  ['critical','🔴 Серьёзные замечания'],
+  ['na','Не применимо']
+];
+const departmentHints = {
+  SALES:'Заполняйте при наличии замечаний к подготовке мероприятия отделом продаж. Укажите недочёты в ТЗ, схеме, таймингах, передаче информации или коммуникации.',
+  SUPPORT:'Заполняйте при наличии замечаний к работе службы поддержки. Укажите проблемы с коммуникацией, скоростью реакции, подготовкой зала, посуды, мебели или выполнением задач.',
+  CLEANING:'Заполняйте при наличии замечаний к клинингу. Укажите проблемы с чистотой площадки, уборкой в течение мероприятия, финальным клинингом или скоростью реагирования.',
+  DEVELOPMENT:'Заполняйте при наличии замечаний к технической службе. Укажите проблемы с оборудованием, подключением, схемой, таймингом или решением технических вопросов.',
+  SECURITY:'Заполняйте при наличии замечаний к охране. Укажите нарушения регламентов, проблемы с коммуникацией, дисциплиной, работой с гостями или конфликтные ситуации.',
+  MAG:'Заполняйте при наличии замечаний к дежурному инженеру или эксплуатационной службе. Укажите выявленные проблемы, реакцию на запросы и влияние на мероприятие.',
+  KITCHEN:'Заполняйте при наличии замечаний к кухне. Укажите задержки выдачи блюд, ошибки, визуальные или вкусовые недочёты, проблемы с таймингом.',
+  SERVICE:'Заполняйте при наличии замечаний к официантам и сервисной команде. Укажите опоздания, форму, подготовку зон, качество обслуживания, работу с гостями или сдачу зала.',
+  BAR:'Заполняйте, если на мероприятии работал бар и были замечания. Укажите тайминг, внешний вид, качество напитков, коммуникацию или обратную связь гостей.',
+  HOOKAH:'Заполняйте, если на мероприятии работали кальяны и были замечания. Укажите качество работы, тайминг, коммуникацию или обратную связь гостей.'
+};
+
+const today = new Date().toISOString().slice(0,10);
+let screenIndex = 0;
+let photos = [];
+let state = loadDraft() || createInitialState();
+
+function createInitialState(){
+  return {
+    type:'event',
+    event:{
+      date:today,
+      loft:'LOFT#3',
+      hall:'',
+      eventType:'',
+      customEventType:'',
+      eventName:'',
+      guestCount:'',
+      formats:[],
+      opManager:'',
+      orManager:'',
+      contactType:'',
+      customContactType:'',
+      contactComment:'',
+      serviceStaff:''
+    },
+    tasting:{ date:today, opManager:'', orManager:'', eventName:'', hall:'', comments:'' },
+    departments:Object.fromEntries(ALL_DEPARTMENTS.map(name => [name,{ status: OPTIONAL_DEPARTMENTS.includes(name) ? 'na' : '', comment:'' }])),
+    about:{ communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' }
+  };
+}
+
+function loadDraft(){
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+    if (!parsed) return null;
+    const base = createInitialState();
+    return {
+      ...base,
+      ...parsed,
+      event:{ ...base.event, ...(parsed.event || {}) },
+      tasting:{ ...base.tasting, ...(parsed.tasting || {}) },
+      departments:{ ...base.departments, ...(parsed.departments || {}) },
+      about:{ ...base.about, ...(parsed.about || {}) }
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(){
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+}
+
+function pathSet(path, value){
+  const parts = path.split('.');
+  let target = state;
+  for (let index = 0; index < parts.length - 1; index += 1) target = target[parts[index]];
+  target[parts.at(-1)] = value;
+  saveDraft();
+}
+
+function pathGet(path){
+  return path.split('.').reduce((target, key) => target?.[key], state) || '';
+}
+
+function getSteps(){
+  return state.type === 'event' ? EVENT_STEPS : TASTING_STEPS;
+}
+
+function showError(message){
+  submitError.textContent = message;
+  submitError.classList.add('show');
+  tg?.HapticFeedback?.notificationOccurred?.('error');
+}
+
+function clearError(){
+  submitError.textContent = '';
+  submitError.classList.remove('show');
+}
+
+function escapeHtml(value){
+  return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+}
+
+function initTelegram(){
+  if (!initData) {
+    access.classList.remove('hidden');
+    return;
+  }
+
+  tg?.ready();
+  tg?.expand();
+  if (tg?.colorScheme === 'dark') document.body.classList.add('dark');
+
+  fetch('/api/auth/telegram', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify({ initData })
+  })
+    .then(async response => {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || 'Не удалось проверить запуск через Telegram.');
+      app.classList.remove('hidden');
+      renderAll();
+    })
+    .catch(error => {
+      access.classList.remove('hidden');
+      access.querySelector('.section-note').textContent = error.message;
+    });
+}
+
+function renderAll(){
+  renderSelects();
+  renderBoundFields();
+  renderTypes();
+  renderHalls();
+  renderFormats();
+  renderDepartments();
+  renderPhotos();
+  renderScreen();
+}
+
+function renderSelects(){
+  loftSelect.innerHTML = Object.keys(lofts).map(name => `<option ${state.event.loft === name ? 'selected' : ''}>${name}</option>`).join('');
+  eventType.innerHTML = `<option value="">Выберите тип</option>${eventTypes.map(name => `<option ${state.event.eventType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
+  contactType.innerHTML = `<option value="">Выберите контакт</option>${contactTypes.map(name => `<option ${state.event.contactType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
+}
+
+function renderBoundFields(){
+  document.querySelectorAll('[data-bind]').forEach(input => {
+    input.value = pathGet(input.dataset.bind);
+  });
+  eventFields.classList.toggle('hidden', state.type !== 'event');
+  tastingFields.classList.toggle('hidden', state.type !== 'tasting');
+  customEventType.classList.toggle('hidden', state.event.eventType !== 'Другое');
+  customContactType.classList.toggle('hidden', state.event.contactType !== 'Другое');
+  customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
+  customHall.classList.toggle('hidden', state.event.loft !== 'Другое');
+}
+
+function renderTypes(){
+  document.querySelectorAll('[data-report-type]').forEach(button => {
+    button.classList.toggle('active', button.dataset.reportType === state.type);
+  });
+}
+
+function renderHalls(){
+  const halls = [...(lofts[state.event.loft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
+  const query = hallSearch.value.trim().toLowerCase();
+  hallList.classList.toggle('hidden', state.event.loft === 'Другое');
+  hallList.innerHTML = halls
+    .filter(name => name.toLowerCase().includes(query))
+    .map(name => `<button class="hall-btn ${state.event.hall === name ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
+    .join('');
+}
+
+function renderFormats(){
+  formatChips.innerHTML = formats.map(name => `
+    <button class="chip ${state.event.formats.includes(name) ? 'active' : ''}" type="button" data-format="${escapeHtml(name)}">${escapeHtml(name)}</button>
+  `).join('');
+}
+
+function renderDepartments(){
+  departmentsEl.innerHTML = ALL_DEPARTMENTS.map(name => {
+    const entry = state.departments[name] || { status:'', comment:'' };
+    const options = statusOptions
+      .filter(([status]) => status !== 'na' || OPTIONAL_DEPARTMENTS.includes(name))
+      .map(([status,label]) => `<button class="status-btn ${entry.status === status ? 'active' : ''}" data-department="${name}" data-status="${status}" type="button">${label}</button>`)
+      .join('');
+    const needsComment = entry.status === 'warning' || entry.status === 'critical';
+    return `
+      <div class="dept-card">
+        <div class="dept-top"><div class="dept-name">${name}</div></div>
+        <div class="hint">${departmentHints[name]}</div>
+        <div class="status-row">${options}</div>
+        <textarea class="textarea ${needsComment ? '' : 'hidden'}" data-department-comment="${name}" placeholder="Опишите конкретно, что произошло">${escapeHtml(entry.comment)}</textarea>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPhotos(){
+  photoCount.textContent = `Фото: ${photos.length}`;
+  photoGrid.innerHTML = photos.map((photo, index) => `
+    <div class="photo">
+      <img src="${photo.preview}" alt="Фото ${index + 1}">
+      <button type="button" data-remove-photo="${index}" aria-label="Удалить фото">×</button>
+    </div>
+  `).join('');
+}
+
+function renderReview(){
+  const payload = buildPayload();
+  const rows = [];
+  if (state.type === 'event') {
+    rows.push(['Дата', payload.event.date], ['Зал', payload.event.hall], ['Мероприятие', payload.event.eventName], ['Тип', payload.event.eventType], ['Формат', joinList(payload.event.formats)], ['Гостей', payload.event.guestCount], ['ОП', payload.event.opManager], ['ОР', payload.event.orManager]);
+    const withIssues = ALL_DEPARTMENTS.filter(name => ['warning','critical'].includes(payload.departments[name]?.status));
+    const ok = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'ok');
+    const na = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'na');
+    rows.push(['Замечания', withIssues.length ? withIssues.join(', ') : 'Нет']);
+    rows.push(['Без замечаний', ok.join(', ') || 'Нет']);
+    rows.push(['Не применимо', na.join(', ') || 'Нет']);
+    rows.push(['ABOUT', buildAboutText(payload.about) || 'Не заполнено']);
+  } else {
+    rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Мероприятие', payload.tasting.eventName], ['Зал', payload.tasting.hall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
+  }
+  rows.push(['Фото', `${photos.length} шт.`]);
+
+  reviewEl.innerHTML = rows.map(([label,value]) => `<div class="review-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`).join('');
+}
+
+function renderScreen(){
+  const steps = getSteps();
+  const currentScreen = steps[screenIndex];
+  document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', Number(screen.dataset.screen) === currentScreen));
+  progressBar.style.width = `${Math.round(((screenIndex + 1) / steps.length) * 100)}%`;
+  backBtn.disabled = screenIndex === 0;
+  nextBtn.textContent = screenIndex === steps.length - 1 ? 'Отправить' : 'Далее';
+  stepLabel.textContent = ['Выбор отчёта','Данные','Службы','ABOUT THE EVENT','Фото','Проверка'][currentScreen];
+  if (currentScreen === 5) renderReview();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function getResolvedEventType(){
+  return state.event.eventType === 'Другое' ? state.event.customEventType : state.event.eventType;
+}
+
+function getResolvedContactType(){
+  return state.event.contactType === 'Другое' ? state.event.customContactType : state.event.contactType;
+}
+
+function getResolvedFormats(){
+  const selected = state.event.formats.filter(name => name !== 'Другое');
+  if (state.event.formats.includes('Другое') && cleanText(customFormat.value)) selected.push(cleanText(customFormat.value));
+  return selected;
+}
+
+function buildPayload(){
+  if (state.type === 'tasting') {
+    return { type:'tasting', tasting:{ ...state.tasting } };
+  }
+  return {
+    type:'event',
+    event:{
+      ...state.event,
+      hall: state.event.loft === 'Другое' ? state.event.hall : state.event.hall,
+      eventType:getResolvedEventType(),
+      contactType:getResolvedContactType(),
+      formats:getResolvedFormats()
+    },
+    departments:state.departments,
+    about:state.about
+  };
+}
+
+function requireText(value, message){
+  if (!cleanText(value)) throw new Error(message);
+}
+
+function validateCurrentScreen(){
+  const screen = getSteps()[screenIndex];
+  const payload = buildPayload();
+  if (screen === 1 && state.type === 'event') {
+    requireText(payload.event.date, 'Укажите дату.');
+    requireText(payload.event.hall, 'Укажите зал.');
+    requireText(payload.event.eventType, 'Укажите тип мероприятия.');
+    requireText(payload.event.eventName, 'Укажите название мероприятия.');
+    requireText(payload.event.guestCount, 'Укажите количество гостей.');
+    if (!payload.event.formats.length) throw new Error('Выберите формат мероприятия.');
+    requireText(payload.event.opManager, 'Укажите менеджера ОП.');
+    requireText(payload.event.orManager, 'Укажите менеджера ОР.');
+    requireText(payload.event.contactType, 'Укажите организатора / заказчика.');
+  }
+  if (screen === 1 && state.type === 'tasting') {
+    requireText(payload.tasting.date, 'Укажите дату.');
+    requireText(payload.tasting.opManager, 'Укажите ОП.');
+    requireText(payload.tasting.orManager, 'Укажите ОР.');
+    requireText(payload.tasting.eventName, 'Укажите название мероприятия.');
+    requireText(payload.tasting.hall, 'Укажите зал.');
+  }
+  if (screen === 2) {
+    for (const name of REQUIRED_DEPARTMENTS) {
+      const entry = state.departments[name];
+      if (!entry.status) throw new Error(`Выберите статус службы ${name}.`);
+      if (['warning','critical'].includes(entry.status)) requireText(entry.comment, `Добавьте комментарий к службе ${name}.`);
+    }
+    for (const name of OPTIONAL_DEPARTMENTS) {
+      const entry = state.departments[name];
+      if (!entry.status) throw new Error(`Выберите статус службы ${name}.`);
+      if (['warning','critical'].includes(entry.status)) requireText(entry.comment, `Добавьте комментарий к службе ${name}.`);
+    }
+  }
+  if (screen === 3 && !buildAboutText(state.about)) throw new Error('Заполните хотя бы одно поле ABOUT THE EVENT.');
+  if (screen === 4) {
+    if (!photos.length) throw new Error('Добавьте хотя бы одно фото с мероприятия.');
+    if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
+  }
+}
+
+async function compressImage(file){
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) return file;
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return file;
+  const maxSide = 2560;
+  const ratio = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  if (ratio === 1 && file.size < 3.5 * 1024 * 1024) return file;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * ratio);
+  canvas.height = Math.round(bitmap.height * ratio);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+  if (!blob || blob.size >= file.size) return file;
+  return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type:'image/jpeg' });
+}
+
+async function addPhotos(fileList){
+  const incoming = [...fileList];
+  if (photos.length + incoming.length > MAX_PHOTOS) {
+    showError('Можно загрузить не больше 30 фото.');
+    return;
+  }
+  clearError();
+  for (const file of incoming) {
+    if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name) && !['image/jpeg','image/png','image/webp','image/heic','image/heif'].includes(file.type)) {
+      showError('Фото должны быть в формате jpg, jpeg, png, webp, heic или heif.');
+      continue;
+    }
+    const processed = await compressImage(file);
+    photos.push({ file:processed, preview:URL.createObjectURL(processed) });
+  }
+  renderPhotos();
+}
+
+async function submitReport(){
+  validateCurrentScreen();
+  if (!confirm('Отправить фото и итоговый отчёт в рабочую группу?')) return;
+
+  clearError();
+  nextBtn.disabled = true;
+  backBtn.disabled = true;
+  nextBtn.textContent = 'Отправляем...';
+
+  const form = new FormData();
+  const payload = buildPayload();
+  form.set('initData', initData);
+  form.set('reportPayload', JSON.stringify(payload));
+  for (const photo of photos) form.append('photos', photo.file, photo.file.name);
+
+  try {
+    const response = await fetch('/api/reports', { method:'POST', body:form });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Не удалось отправить отчёт.');
+    localStorage.removeItem(DRAFT_KEY);
+    tg?.HapticFeedback?.notificationOccurred?.('success');
+    tg?.showAlert?.('Отчёт отправлен.');
+    setTimeout(() => tg?.close?.(), 500);
+  } catch (error) {
+    showError(error.message);
+    nextBtn.disabled = false;
+    backBtn.disabled = false;
+    nextBtn.textContent = 'Отправить';
+  }
+}
+
+document.addEventListener('input', event => {
+  const input = event.target.closest('[data-bind]');
+  if (!input) return;
+  pathSet(input.dataset.bind, input.value);
+  renderBoundFields();
+});
+
+document.addEventListener('focusin', clearError);
+document.addEventListener('pointerdown', event => {
+  if (!event.target.closest('input, textarea, select')) document.activeElement?.blur?.();
+}, true);
+
+document.querySelectorAll('[data-report-type]').forEach(button => {
+  button.addEventListener('click', () => {
+    state.type = button.dataset.reportType;
+    screenIndex = 0;
+    saveDraft();
+    renderAll();
+  });
+});
+
+loftSelect.addEventListener('change', () => {
+  state.event.loft = loftSelect.value;
+  state.event.hall = '';
+  hallSearch.value = '';
+  saveDraft();
+  renderBoundFields();
+  renderHalls();
+});
+
+hallSearch.addEventListener('input', renderHalls);
+hallList.addEventListener('click', event => {
+  const button = event.target.closest('[data-hall]');
+  if (!button) return;
+  state.event.hall = button.dataset.hall;
+  saveDraft();
+  renderHalls();
+});
+
+eventType.addEventListener('change', () => { state.event.eventType = eventType.value; saveDraft(); renderBoundFields(); });
+contactType.addEventListener('change', () => { state.event.contactType = contactType.value; saveDraft(); renderBoundFields(); });
+
+formatChips.addEventListener('click', event => {
+  const button = event.target.closest('[data-format]');
+  if (!button) return;
+  const value = button.dataset.format;
+  state.event.formats = state.event.formats.includes(value)
+    ? state.event.formats.filter(item => item !== value)
+    : [...state.event.formats, value];
+  saveDraft();
+  renderFormats();
+  renderBoundFields();
+});
+
+customFormat.addEventListener('input', saveDraft);
+
+departmentsEl.addEventListener('click', event => {
+  const button = event.target.closest('[data-department][data-status]');
+  if (!button) return;
+  const entry = state.departments[button.dataset.department];
+  entry.status = button.dataset.status;
+  if (entry.status === 'ok' || entry.status === 'na') entry.comment = '';
+  saveDraft();
+  renderDepartments();
+});
+
+departmentsEl.addEventListener('input', event => {
+  const textarea = event.target.closest('[data-department-comment]');
+  if (!textarea) return;
+  state.departments[textarea.dataset.departmentComment].comment = textarea.value;
+  saveDraft();
+});
+
+photoInput.addEventListener('change', event => {
+  addPhotos(event.target.files);
+  photoInput.value = '';
+});
+
+photoGrid.addEventListener('click', event => {
+  const button = event.target.closest('[data-remove-photo]');
+  if (!button) return;
+  const index = Number(button.dataset.removePhoto);
+  URL.revokeObjectURL(photos[index].preview);
+  photos.splice(index, 1);
+  renderPhotos();
+});
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+});
+
+backBtn.addEventListener('click', () => {
+  if (screenIndex > 0) {
+    clearError();
+    screenIndex -= 1;
+    renderScreen();
+  }
+});
+
+nextBtn.addEventListener('click', async () => {
+  try {
+    clearError();
+    if (screenIndex === getSteps().length - 1) {
+      await submitReport();
+      return;
+    }
+    validateCurrentScreen();
+    screenIndex += 1;
+    renderScreen();
+  } catch (error) {
+    showError(error.message);
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  photos.forEach(photo => URL.revokeObjectURL(photo.preview));
+});
+
+initTelegram();
+</script>
+</body>
+</html>

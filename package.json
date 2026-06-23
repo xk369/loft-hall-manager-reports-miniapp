@@ -1,0 +1,20 @@
+{
+  "name": "loft-hall-manager-reports-miniapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Telegram Mini App for LOFT HALL manager event and tasting reports.",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "helmet": "8.2.0"
+  }
+}

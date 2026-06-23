@@ -1,0 +1,9 @@
+services:
+  loft-manager-reports:
+    build: .
+    container_name: loft-manager-reports
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3200:3000"

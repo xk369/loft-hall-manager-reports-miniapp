@@ -1,0 +1,149 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { formatEventReport, formatTastingReport } from '../public/report-format.js';
+import { buildReportText } from '../src/report.js';
+
+const eventPayload = {
+  type: 'event',
+  event: {
+    date: '2026-06-11',
+    hall: 'Grace',
+    eventType: 'Свадьба',
+    eventName: 'Свадьба Александра и Марины',
+    guestCount: 39,
+    formats: ['Банкет'],
+    opManager: 'Бешимова',
+    orManager: 'Харзиани',
+    contactType: 'Организатор',
+    contactComment: 'Вера, Анастасия',
+    serviceStaff: '4 официанта'
+  },
+  departments: {
+    SALES: { status: 'ok', comment: '' },
+    SUPPORT: { status: 'warning', comment: 'Оперативно поменяли расстановку мебели.' },
+    CLEANING: { status: 'ok', comment: '' },
+    DEVELOPMENT: { status: 'ok', comment: '' },
+    SECURITY: { status: 'critical', comment: 'Некорректная коммуникация.' },
+    MAG: { status: 'ok', comment: '' },
+    KITCHEN: { status: 'ok', comment: '' },
+    SERVICE: { status: 'ok', comment: '' },
+    BAR: { status: 'na', comment: '' },
+    HOOKAH: { status: 'na', comment: '' }
+  },
+  about: {
+    communication: 'Коммуникация велась с координаторами.',
+    eventFlow: 'Мероприятие прошло штатно.',
+    feedback: '',
+    leftovers: 'Еду и алкоголь передали паре.',
+    futureNotes: ''
+  }
+};
+
+test('formats event report for Telegram', () => {
+  assert.equal(
+    formatEventReport(eventPayload, 18),
+    [
+      'LOFT HALL · ОТЧЁТ ПО МЕРОПРИЯТИЮ',
+      '',
+      'Дата: 11.06.2026',
+      'Зал: Grace',
+      'Мероприятие: Свадьба Александра и Марины',
+      'Тип: Свадьба',
+      'Формат: Банкет',
+      'Количество гостей: 39',
+      '',
+      'Менеджер ОП: Бешимова',
+      'Менеджер ОР: Харзиани',
+      'Организатор / заказчик: Организатор — Вера, Анастасия',
+      'Персонал сервиса: 4 официанта',
+      '',
+      '━━━━━━━━━━━━━━━',
+      'ОЦЕНКА СЛУЖБ',
+      '',
+      'SALES',
+      '✅ Замечаний нет.',
+      '',
+      'SUPPORT',
+      '🟡 Есть замечания.',
+      '↳ Оперативно поменяли расстановку мебели.',
+      '',
+      'CLEANING',
+      '✅ Замечаний нет.',
+      '',
+      'DEVELOPMENT',
+      '✅ Замечаний нет.',
+      '',
+      'SECURITY',
+      '🔴 Серьёзные замечания.',
+      '↳ Некорректная коммуникация.',
+      '',
+      'MAG',
+      '✅ Замечаний нет.',
+      '',
+      'KITCHEN',
+      '✅ Замечаний нет.',
+      '',
+      'SERVICE',
+      '✅ Замечаний нет.',
+      '',
+      'BAR',
+      'Не применимо.',
+      '',
+      'HOOKAH',
+      'Не применимо.',
+      '',
+      '━━━━━━━━━━━━━━━',
+      'ABOUT THE EVENT',
+      '',
+      'Коммуникация велась с координаторами.',
+      '',
+      'Мероприятие прошло штатно.',
+      '',
+      'Еду и алкоголь передали паре.',
+      '',
+      '━━━━━━━━━━━━━━━',
+      'ФОТООТЧЁТ',
+      '',
+      'Фото отправлены выше: 18 шт.'
+    ].join('\n')
+  );
+});
+
+test('validates required service comments', () => {
+  const payload = structuredClone(eventPayload);
+  payload.departments.SUPPORT.comment = '';
+  assert.throws(() => buildReportText(payload, 1), /SUPPORT/);
+});
+
+test('formats tasting report', () => {
+  assert.equal(
+    formatTastingReport(
+      {
+        tasting: {
+          date: '2026-06-12',
+          opManager: 'Иванова',
+          orManager: 'Петрова',
+          eventName: 'Дегустация по мероприятию 20.07.2026',
+          hall: 'Grace',
+          comments: 'Гости согласовали меню.'
+        }
+      },
+      5
+    ),
+    [
+      'LOFT HALL · ОТЧЁТ ПО ДЕГУСТАЦИИ',
+      '',
+      'Дата: 12.06.2026',
+      'ОП: Иванова',
+      'ОР: Петрова',
+      'Название мероприятия: Дегустация по мероприятию 20.07.2026',
+      'Зал: Grace',
+      'Комментарии: Гости согласовали меню.',
+      '',
+      '━━━━━━━━━━━━━━━',
+      'ФОТООТЧЁТ',
+      '',
+      'Фото отправлены выше: 5 шт.'
+    ].join('\n')
+  );
+});
