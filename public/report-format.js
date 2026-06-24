@@ -13,10 +13,10 @@ export const OPTIONAL_DEPARTMENTS = ['BAR', 'HOOKAH'];
 export const ALL_DEPARTMENTS = [...REQUIRED_DEPARTMENTS, ...OPTIONAL_DEPARTMENTS];
 
 export const STATUS_LABELS = {
-  ok: '✅ Замечаний нет.',
-  warning: '🟡 Есть замечания.',
-  critical: '🔴 Серьёзные замечания.',
-  na: 'Не применимо.'
+  ok: 'Проверено, замечаний нет.',
+  warning: 'Есть замечания.',
+  critical: 'Серьёзные замечания.',
+  na: 'Не заказывали.'
 };
 
 export function cleanText(value) {
@@ -54,8 +54,50 @@ export function joinList(values) {
     .join(', ');
 }
 
+function uniq(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function hashtagToken(value) {
+  const token = cleanText(value)
+    .replace(/#/g, '')
+    .replace(/№/g, '')
+    .replace(/[^\p{L}\p{N}_]+/gu, '');
+  return token ? `#${token}` : '';
+}
+
+function managerHashtags(value) {
+  return cleanText(value)
+    .split(/\s*(?:\/|,|;|\+|&|\s+и\s+)\s*/iu)
+    .map(part => cleanText(part).split(/\s+/)[0])
+    .map(hashtagToken)
+    .filter(Boolean);
+}
+
+function loftHashtag(value) {
+  const text = cleanText(value).replace(/\s*полностью$/i, '');
+  const loftMatch = text.match(/^LOFT#?(\d+(?:[-–]\d+)?)$/i);
+  if (loftMatch) return `#LOFT${loftMatch[1].replace(/[-–]/g, '_')}`;
+  const token = text
+    .replace(/#/g, '')
+    .replace(/№/g, '')
+    .split(/[^\p{L}\p{N}_]+/u)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  return hashtagToken(token);
+}
+
+export function buildReportHashtags({ opManager, orManager, loft } = {}) {
+  return uniq([
+    ...managerHashtags(opManager),
+    ...managerHashtags(orManager),
+    loftHashtag(loft)
+  ]).join(' ');
+}
+
 export function formatPhotoStatus(photoCount = 0, photosLater = false) {
-  if (photosLater) return 'Фото будут отправлены позже.';
+  if (photosLater) return 'Фото будут отправлены отдельно в группу.';
   return `Фото отправлены выше: ${photoCount} шт.`;
 }
 
@@ -84,8 +126,6 @@ export function formatEventReport(payload, photoCount = 0) {
   const departments = payload?.departments || {};
   const aboutText = buildAboutText(payload?.about);
   const lines = [
-    'LOFT HALL · ОТЧЁТ ПО МЕРОПРИЯТИЮ',
-    '',
     `Дата: ${formatDate(event.date)}`,
     `Лофт: ${cleanText(event.loft)}`,
     `Зал: ${cleanText(event.hall) || joinList(event.halls)}`,
@@ -116,6 +156,8 @@ export function formatEventReport(payload, photoCount = 0) {
 
   lines.push('━━━━━━━━━━━━━━━', 'ABOUT THE EVENT', '', aboutText || 'Не заполнено.');
   lines.push('', '━━━━━━━━━━━━━━━', 'ФОТООТЧЁТ', '', formatPhotoStatus(photoCount, payload?.photosLater));
+  const hashtags = buildReportHashtags(event);
+  if (hashtags) lines.push('', hashtags);
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -126,9 +168,7 @@ export function formatTastingReport(payload, photoCount = 0) {
   const eventDescription = eventDate || eventHall
     ? cleanText(`Дегустация по мероприятию ${eventDate} ${eventHall}`)
     : cleanText(tasting.eventName);
-  return [
-    'LOFT HALL · ОТЧЁТ ПО ДЕГУСТАЦИИ',
-    '',
+  const lines = [
     `Дата: ${formatDate(tasting.date)}`,
     `ОП: ${cleanText(tasting.opManager)}`,
     `ОР: ${cleanText(tasting.orManager)}`,
@@ -141,5 +181,12 @@ export function formatTastingReport(payload, photoCount = 0) {
     'ФОТООТЧЁТ',
     '',
     formatPhotoStatus(photoCount, payload?.photosLater)
-  ].join('\n');
+  ];
+  const hashtags = buildReportHashtags({
+    opManager: tasting.opManager,
+    orManager: tasting.orManager,
+    loft: tasting.loft
+  });
+  if (hashtags) lines.push('', hashtags);
+  return lines.join('\n');
 }

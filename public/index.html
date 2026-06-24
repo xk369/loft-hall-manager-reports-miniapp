@@ -499,10 +499,29 @@ input[type="date"]{
   font-weight:720;
   font-size:13px;
   text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+}
+.skip-photo::before{
+  content:"";
+  inline-size:16px;
+  block-size:16px;
+  border-radius:5px;
+  border:1px solid var(--line-strong);
+  background:var(--panel);
 }
 .skip-photo.active{
   border-color:var(--mint);
   color:var(--mint);
+}
+.skip-photo.active::before{
+  border-color:var(--mint);
+  background:
+    linear-gradient(135deg, transparent 42%, var(--mint) 43% 58%, transparent 59%),
+    linear-gradient(45deg, transparent 48%, var(--mint) 49% 62%, transparent 63%),
+    var(--panel);
 }
 
 .photo img{
@@ -575,6 +594,51 @@ input[type="date"]{
   width:min(calc(100% - 28px),452px);
   z-index:40;
   box-shadow:var(--shadow);
+}
+
+.sending-overlay{
+  position:fixed;
+  inset:0;
+  z-index:80;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(5,6,9,.76);
+  backdrop-filter:blur(18px);
+}
+.sending-card{
+  width:min(100%,360px);
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--panel-2);
+  box-shadow:var(--shadow);
+  padding:18px;
+}
+.sending-title{
+  margin:0;
+  font-size:20px;
+  line-height:1.2;
+  font-weight:780;
+}
+.sending-text{
+  margin:8px 0 14px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.45;
+}
+.sending-track{
+  height:4px;
+  border-radius:999px;
+  overflow:hidden;
+  background:var(--field);
+}
+.sending-track span{
+  display:block;
+  width:0%;
+  height:100%;
+  border-radius:inherit;
+  background:var(--accent);
+  transition:width 180ms ease;
 }
 
 .access{
@@ -669,13 +733,11 @@ body.input-focused .bar{
             <button class="type-card active" type="button" data-report-type="event">
               <div>
                 <div class="type-name">Ивент</div>
-                <div class="type-note">Отчёт по проведённому мероприятию</div>
               </div>
             </button>
             <button class="type-card" type="button" data-report-type="tasting">
               <div>
                 <div class="type-name">Дегустация</div>
-                <div class="type-note">Отчёт по дегустации или тестовой подаче</div>
               </div>
             </button>
           </div>
@@ -719,7 +781,7 @@ body.input-focused .bar{
       <div class="stack">
         <div class="panel" id="departmentsPanel">
           <h2 class="section-title">Оценка служб</h2>
-          <p class="section-note">Для статусов с замечаниями комментарий обязателен. BAR и HOOKAH можно отметить как не применимо.</p>
+          <p class="section-note">Для статусов с замечаниями комментарий обязателен. BAR и HOOKAH можно отметить как не заказывали.</p>
         </div>
         <div id="departments"></div>
 
@@ -739,7 +801,7 @@ body.input-focused .bar{
               <p class="section-note">Добавьте фотографии мероприятия. Они будут отправлены в группу перед текстовым отчётом.</p>
               <div class="photo-actions">
                 <button class="photo-pick-btn" id="photoPickBtn" type="button">Добавить фотографии</button>
-                <button class="skip-photo" id="photosLaterBtn" type="button">Скину фотографии отдельно в группу</button>
+                <button class="skip-photo" id="photosLaterBtn" type="button" aria-pressed="false">Фото будут отправлены отдельно</button>
               </div>
               <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
             </div>
@@ -771,6 +833,14 @@ body.input-focused .bar{
   </footer>
 </div>
 
+<div class="sending-overlay hidden" id="sendingOverlay" aria-hidden="true">
+  <div class="sending-card">
+    <h2 class="sending-title" id="sendingTitle">Отправляем отчёт</h2>
+    <p class="sending-text" id="sendingText">Подготовка данных...</p>
+    <div class="sending-track"><span id="sendingBar"></span></div>
+  </div>
+</div>
+
 <script type="module">
 import {
   ALL_DEPARTMENTS,
@@ -793,6 +863,10 @@ const stepLabel = document.getElementById('stepLabel');
 const backBtn = document.getElementById('backBtn');
 const nextBtn = document.getElementById('nextBtn');
 const submitError = document.getElementById('formError');
+const sendingOverlay = document.getElementById('sendingOverlay');
+const sendingTitle = document.getElementById('sendingTitle');
+const sendingText = document.getElementById('sendingText');
+const sendingBar = document.getElementById('sendingBar');
 const eventFields = document.getElementById('eventFields');
 const tastingFields = document.getElementById('tastingFields');
 const departmentsPanel = document.getElementById('departmentsPanel');
@@ -826,6 +900,7 @@ const DRAFT_KEY = 'loft_manager_report_draft_v1';
 const MAX_PHOTOS = 30;
 const EVENT_STEPS = [0,1,2,5];
 const TASTING_STEPS = [0,1,5];
+const FULL_LOFTS = ['LOFT#1','LOFT#2','LOFT#3','LOFT#4','LOFT#8','LOFT#10'];
 
 const lofts = {
   'LOFT#1':['AVANTAGE','CHATEAU','LOSK','ROYAL BLANC'],
@@ -840,6 +915,19 @@ const lofts = {
   'Другое':[]
 };
 
+function fullLoftLabel(loft){
+  return `${loft} полностью`;
+}
+
+function isFullLoft(value){
+  return FULL_LOFTS.map(fullLoftLabel).includes(cleanText(value));
+}
+
+function getBaseLoft(value){
+  const text = cleanText(value);
+  return isFullLoft(text) ? text.replace(/\s+полностью$/i, '') : text;
+}
+
 const eventTypes = ['Свадьба','Корпоратив','День рождения','Выпускной','Конференция','Деловое мероприятие','Другое'];
 const formats = ['Банкет','Фуршет','Кофе-брейк','Выездной кейтеринг','Другое'];
 const contactTypes = ['Организатор','Заказчик','Координатор'];
@@ -847,7 +935,7 @@ const statusOptions = [
   ['ok','Без замечаний'],
   ['warning','Есть замечания'],
   ['critical','Серьёзные'],
-  ['na','Не применимо']
+  ['na','Не заказывали']
 ];
 const departmentHints = {
   SALES:'Заполняйте при наличии замечаний к подготовке мероприятия отделом продаж. Укажите недочёты в ТЗ, схеме, таймингах, передаче информации или коммуникации.',
@@ -945,6 +1033,25 @@ function clearError(){
   submitError.classList.remove('show');
 }
 
+function showSending({ title = 'Отправляем отчёт', text = 'Подготовка данных...', progress = 0 } = {}){
+  sendingTitle.textContent = title;
+  sendingText.textContent = text;
+  sendingBar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+  sendingOverlay.classList.remove('hidden');
+  sendingOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function updateSending({ title, text, progress } = {}){
+  if (title) sendingTitle.textContent = title;
+  if (text) sendingText.textContent = text;
+  if (typeof progress === 'number') sendingBar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+}
+
+function hideSending(){
+  sendingOverlay.classList.add('hidden');
+  sendingOverlay.setAttribute('aria-hidden', 'true');
+}
+
 function clearInvalidFields(){
   document.querySelectorAll('.field.is-invalid').forEach(field => {
     field.classList.remove('is-invalid');
@@ -963,6 +1070,17 @@ function markInvalid(path, message){
 
 function escapeHtml(value){
   return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+}
+
+function renderLoftOptions(selectedValue){
+  return Object.keys(lofts).flatMap(loft => {
+    const options = [`<option value="${escapeHtml(loft)}" ${selectedValue === loft ? 'selected' : ''}>${escapeHtml(loft)}</option>`];
+    if (FULL_LOFTS.includes(loft)) {
+      const fullValue = fullLoftLabel(loft);
+      options.push(`<option value="${escapeHtml(fullValue)}" ${selectedValue === fullValue ? 'selected' : ''}>${escapeHtml(fullValue)}</option>`);
+    }
+    return options;
+  }).join('');
 }
 
 function initTelegram(){
@@ -1005,8 +1123,8 @@ function renderAll(){
 }
 
 function renderSelects(){
-  loftSelect.innerHTML = Object.keys(lofts).map(name => `<option ${state.event.loft === name ? 'selected' : ''}>${name}</option>`).join('');
-  tastingLoftSelect.innerHTML = Object.keys(lofts).map(name => `<option ${state.tasting.loft === name ? 'selected' : ''}>${name}</option>`).join('');
+  loftSelect.innerHTML = renderLoftOptions(state.event.loft);
+  tastingLoftSelect.innerHTML = renderLoftOptions(state.tasting.loft);
   eventType.innerHTML = `<option value="">Выберите тип</option>${eventTypes.map(name => `<option ${state.event.eventType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
   contactType.innerHTML = `<option value="">Выберите контакт</option>${contactTypes.map(name => `<option ${state.event.contactType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
 }
@@ -1038,9 +1156,11 @@ function renderTypes(){
 }
 
 function renderHalls(){
-  const halls = [...(lofts[state.event.loft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
+  const baseLoft = getBaseLoft(state.event.loft);
+  const halls = [...(lofts[baseLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
   const selected = getSelectedHalls();
-  hallList.classList.toggle('hidden', state.event.loft === 'Другое');
+  const listHidden = state.event.loft === 'Другое' || isFullLoft(state.event.loft);
+  hallList.classList.toggle('hidden', listHidden);
   selectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
   hallList.innerHTML = halls
     .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
@@ -1048,9 +1168,11 @@ function renderHalls(){
 }
 
 function renderTastingHalls(){
-  const halls = [...(lofts[state.tasting.loft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
+  const baseLoft = getBaseLoft(state.tasting.loft);
+  const halls = [...(lofts[baseLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
   const selected = getSelectedTastingHalls();
-  tastingHallList.classList.toggle('hidden', state.tasting.loft === 'Другое');
+  const listHidden = state.tasting.loft === 'Другое' || isFullLoft(state.tasting.loft);
+  tastingHallList.classList.toggle('hidden', listHidden);
   tastingSelectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
   tastingHallList.innerHTML = halls
     .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-tasting-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
@@ -1088,8 +1210,9 @@ function renderDepartments(){
 function renderPhotos(){
   photoCount.textContent = `Загружено: ${photos.length} из ${MAX_PHOTOS}`;
   photosLaterBtn.classList.toggle('active', state.photosLater);
-  photoInput.disabled = state.photosLater;
-  photoPickBtn.disabled = state.photosLater;
+  photosLaterBtn.setAttribute('aria-pressed', String(state.photosLater));
+  photoInput.disabled = false;
+  photoPickBtn.disabled = false;
   photoGrid.innerHTML = photos.map((photo, index) => `
     <div class="photo">
       <img src="${photo.preview}" alt="Фото ${index + 1}">
@@ -1106,14 +1229,14 @@ function renderReview(){
     const withIssues = ALL_DEPARTMENTS.filter(name => ['warning','critical'].includes(payload.departments[name]?.status));
     const ok = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'ok');
     const na = ALL_DEPARTMENTS.filter(name => payload.departments[name]?.status === 'na');
-    rows.push(['Замечания', withIssues.length ? withIssues.join(', ') : 'Нет']);
+    rows.push(['Замечания по службам', withIssues.length ? withIssues.join(', ') : 'По службам замечаний нет.']);
     rows.push(['Без замечаний', ok.join(', ') || 'Нет']);
-    rows.push(['Не применимо', na.join(', ') || 'Нет']);
+    rows.push(['Не заказывали', na.join(', ') || 'Нет']);
     rows.push(['ABOUT', buildAboutText(payload.about) || 'Не заполнено']);
   } else {
     rows.push(['Дата', payload.tasting.date], ['ОП', payload.tasting.opManager], ['ОР', payload.tasting.orManager], ['Дата мероприятия', payload.tasting.eventDate], ['Лофт мероприятия', payload.tasting.loft], ['Залы мероприятия', payload.tasting.hall], ['Комментарии', payload.tasting.comments || 'Без комментариев']);
   }
-  rows.push(['Фото', state.photosLater ? 'Скинут отдельно в группу' : `${photos.length} шт.`]);
+  rows.push(['Фото', state.photosLater ? 'Будут отправлены отдельно в группу' : `${photos.length} шт.`]);
 
   reviewEl.innerHTML = rows.map(([label,value]) => `<div class="review-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`).join('');
 }
@@ -1146,6 +1269,7 @@ function getResolvedFormats(){
 }
 
 function getSelectedHalls(){
+  if (isFullLoft(state.event.loft)) return [state.event.loft];
   if (state.event.loft === 'Другое') {
     return cleanText(state.event.customHall)
       .split(',')
@@ -1156,6 +1280,7 @@ function getSelectedHalls(){
 }
 
 function getSelectedTastingHalls(){
+  if (isFullLoft(state.tasting.loft)) return [state.tasting.loft];
   if (state.tasting.loft === 'Другое') {
     return cleanText(state.tasting.customHall)
       .split(',')
@@ -1173,6 +1298,7 @@ function buildPayload(){
       type:'tasting',
       tasting:{
         ...state.tasting,
+        loft:getBaseLoft(state.tasting.loft),
         halls:selectedHallsValue,
         eventHall:tastingHallValue,
         eventName:`Дегустация по мероприятию ${state.tasting.eventDate || ''} ${tastingHallValue}`.trim(),
@@ -1187,6 +1313,7 @@ function buildPayload(){
     photosLater:state.photosLater,
     event:{
       ...state.event,
+      loft:getBaseLoft(state.event.loft),
       halls:selectedHallsValue,
       hall:joinList(selectedHallsValue),
       eventType:getResolvedEventType(),
@@ -1239,7 +1366,7 @@ function validateCurrentScreen(){
       markInvalid('tasting.halls', 'Выберите один или несколько залов мероприятия.');
       throw new Error('Выберите один или несколько залов мероприятия.');
     }
-    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии отдельно в группу».');
+    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Фото будут отправлены отдельно».');
     if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
   }
   if (screen === 2) {
@@ -1259,7 +1386,7 @@ function validateCurrentScreen(){
         throw new Error('Заполните комментарий по мероприятию.');
       }
     }
-    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Скину фотографии отдельно в группу».');
+    if (!photos.length && !state.photosLater) throw new Error('Добавьте фото или выберите «Фото будут отправлены отдельно».');
     if (photos.length > MAX_PHOTOS) throw new Error('Можно загрузить не больше 30 фото.');
   }
 }
@@ -1334,6 +1461,11 @@ async function submitReport(){
   nextBtn.disabled = true;
   backBtn.disabled = true;
   nextBtn.textContent = 'Отправляем...';
+  showSending({
+    title:'Отправляем отчёт',
+    text:photos.length ? `Отправляем фото 0 из ${photos.length}` : 'Отправляем текст отчёта...',
+    progress:0
+  });
 
   const form = new FormData();
   const payload = buildPayload();
@@ -1342,19 +1474,67 @@ async function submitReport(){
   for (const photo of photos) form.append('photos', photo.file, photo.file.name);
 
   try {
-    const response = await fetch('/api/reports', { method:'POST', body:form });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) throw new Error(data.error || 'Не удалось отправить отчёт.');
+    const data = await postReportForm(form, photos.length);
+    if (!data.ok) throw new Error(data.error || 'Не удалось отправить отчёт.');
     localStorage.removeItem(DRAFT_KEY);
     tg?.HapticFeedback?.notificationOccurred?.('success');
+    updateSending({ text:'Отчёт отправлен.', progress:100 });
     tg?.showAlert?.('Отчёт отправлен.');
     setTimeout(() => tg?.close?.(), 500);
   } catch (error) {
+    hideSending();
     showError(error.message);
     nextBtn.disabled = false;
     backBtn.disabled = false;
     nextBtn.textContent = 'Отправить фото и отчёт';
   }
+}
+
+function postReportForm(form, totalPhotos){
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open('POST', '/api/reports');
+
+    request.upload.addEventListener('progress', event => {
+      if (!event.lengthComputable) return;
+      const progress = Math.round((event.loaded / event.total) * 84);
+      if (totalPhotos > 0) {
+        const sentPhotos = Math.min(totalPhotos, Math.floor((event.loaded / event.total) * totalPhotos));
+        updateSending({
+          text:`Отправляем фото ${sentPhotos} из ${totalPhotos}`,
+          progress
+        });
+      } else {
+        updateSending({ text:'Отправляем текст отчёта...', progress });
+      }
+    });
+
+    request.upload.addEventListener('load', () => {
+      updateSending({
+        text:totalPhotos > 0 ? 'Фотографии переданы. Отправляем отчёт в группу...' : 'Отправляем отчёт в группу...',
+        progress:88
+      });
+    });
+
+    request.addEventListener('load', () => {
+      let data = {};
+      try {
+        data = JSON.parse(request.responseText || '{}');
+      } catch {
+        data = {};
+      }
+      if (request.status < 200 || request.status >= 300) {
+        reject(new Error(data.error || 'Не удалось отправить отчёт.'));
+        return;
+      }
+      updateSending({ progress:100 });
+      resolve(data);
+    });
+
+    request.addEventListener('error', () => reject(new Error('Не удалось отправить отчёт. Проверьте соединение.')));
+    request.addEventListener('abort', () => reject(new Error('Отправка отчёта прервана.')));
+    request.send(form);
+  });
 }
 
 document.addEventListener('input', event => {
@@ -1395,7 +1575,7 @@ document.querySelectorAll('[data-report-type]').forEach(button => {
 loftSelect.addEventListener('change', () => {
   state.event.loft = loftSelect.value;
   state.event.hall = '';
-  state.event.halls = [];
+  state.event.halls = isFullLoft(state.event.loft) ? [state.event.loft] : [];
   state.event.customHall = '';
   saveDraft();
   renderBoundFields();
@@ -1405,7 +1585,7 @@ loftSelect.addEventListener('change', () => {
 tastingLoftSelect.addEventListener('change', () => {
   state.tasting.loft = tastingLoftSelect.value;
   state.tasting.hall = '';
-  state.tasting.halls = [];
+  state.tasting.halls = isFullLoft(state.tasting.loft) ? [state.tasting.loft] : [];
   state.tasting.eventHall = '';
   state.tasting.customHall = '';
   saveDraft();
@@ -1478,7 +1658,12 @@ photoInput.addEventListener('change', event => {
 });
 
 photoPickBtn.addEventListener('click', () => {
-  if (!state.photosLater) photoInput.click();
+  if (state.photosLater) {
+    state.photosLater = false;
+    saveDraft();
+    renderPhotos();
+  }
+  photoInput.click();
 });
 
 photoGrid.addEventListener('click', event => {

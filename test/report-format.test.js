@@ -45,8 +45,6 @@ test('formats event report for Telegram', () => {
   assert.equal(
     formatEventReport(eventPayload, 18),
     [
-      'LOFT HALL · ОТЧЁТ ПО МЕРОПРИЯТИЮ',
-      '',
       'Дата: 11.06.2026',
       'Лофт: LOFT#3',
       'Зал: Grace',
@@ -64,36 +62,36 @@ test('formats event report for Telegram', () => {
       'ОЦЕНКА СЛУЖБ',
       '',
       'SALES',
-      '✅ Замечаний нет.',
+      'Проверено, замечаний нет.',
       '',
       'SUPPORT',
-      '🟡 Есть замечания.',
+      'Есть замечания.',
       '↳ Оперативно поменяли расстановку мебели.',
       '',
       'CLEANING',
-      '✅ Замечаний нет.',
+      'Проверено, замечаний нет.',
       '',
       'DEVELOPMENT',
-      '✅ Замечаний нет.',
+      'Проверено, замечаний нет.',
       '',
       'SECURITY',
-      '🔴 Серьёзные замечания.',
+      'Серьёзные замечания.',
       '↳ Некорректная коммуникация.',
       '',
       'MAG',
-      '✅ Замечаний нет.',
+      'Проверено, замечаний нет.',
       '',
       'KITCHEN',
-      '✅ Замечаний нет.',
+      'Проверено, замечаний нет.',
       '',
       'SERVICE',
-      '✅ Замечаний нет.',
+      'Проверено, замечаний нет.',
       '',
       'BAR',
-      'Не применимо.',
+      'Не заказывали.',
       '',
       'HOOKAH',
-      'Не применимо.',
+      'Не заказывали.',
       '',
       '━━━━━━━━━━━━━━━',
       'ABOUT THE EVENT',
@@ -107,7 +105,9 @@ test('formats event report for Telegram', () => {
       '━━━━━━━━━━━━━━━',
       'ФОТООТЧЁТ',
       '',
-      'Фото отправлены выше: 18 шт.'
+      'Фото отправлены выше: 18 шт.',
+      '',
+      '#Бешимова #Харзиани #LOFT3'
     ].join('\n')
   );
 });
@@ -121,7 +121,7 @@ test('validates required service comments', () => {
 test('formats deferred photo status', () => {
   const payload = structuredClone(eventPayload);
   payload.photosLater = true;
-  assert.match(formatEventReport(payload, 0), /Фото будут отправлены позже\./);
+  assert.match(formatEventReport(payload, 0), /Фото будут отправлены отдельно в группу\./);
 });
 
 test('allows reports without photos only when photos are deferred', () => {
@@ -148,8 +148,6 @@ test('formats tasting report', () => {
       5
     ),
     [
-      'LOFT HALL · ОТЧЁТ ПО ДЕГУСТАЦИИ',
-      '',
       'Дата: 12.06.2026',
       'ОП: Иванова',
       'ОР: Петрова',
@@ -161,7 +159,9 @@ test('formats tasting report', () => {
       '━━━━━━━━━━━━━━━',
       'ФОТООТЧЁТ',
       '',
-      'Фото отправлены выше: 5 шт.'
+      'Фото отправлены выше: 5 шт.',
+      '',
+      '#Иванова #Петрова #LOFT3'
     ].join('\n')
   );
 });
@@ -186,4 +186,27 @@ test('builds tasting report with loft and multiple halls', () => {
   assert.match(text, /Лофт: LOFT#2/);
   assert.match(text, /Зал: BACKYARD, Rt’s&Rc’s/);
   assert.match(text, /Дегустация по мероприятию 20\.07\.2026 BACKYARD, Rt’s&Rc’s/);
+  assert.match(text, /#Иванова #Петрова #LOFT2/);
+});
+
+test('formats manager hashtags from multiple names', () => {
+  const payload = structuredClone(eventPayload);
+  payload.event.opManager = 'Осотина/Середа';
+  payload.event.orManager = 'Беляченко и Симаненко';
+  payload.event.loft = 'LOFT#4';
+  assert.match(formatEventReport(payload, 1), /#Осотина #Середа #Беляченко #Симаненко #LOFT4$/);
+});
+
+test('formats full loft hashtag safely', () => {
+  const payload = structuredClone(eventPayload);
+  payload.event.loft = 'LOFT#1 полностью';
+  payload.event.hall = 'LOFT#1 полностью';
+  assert.match(formatEventReport(payload, 1), /Зал: LOFT#1 полностью/);
+  assert.match(formatEventReport(payload, 1), /#LOFT1$/);
+});
+
+test('formats named venue loft hashtag in title case', () => {
+  const payload = structuredClone(eventPayload);
+  payload.event.loft = 'Вишневый сад';
+  assert.match(formatEventReport(payload, 1), /#ВишневыйСад$/);
 });
