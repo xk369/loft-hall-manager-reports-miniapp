@@ -450,12 +450,12 @@ input[type="date"]{
 
 .photo-actions{
   display:grid;
-  gap:8px;
+  gap:10px;
 }
 
 .photo-pick-btn{
   width:100%;
-  min-height:46px;
+  min-height:50px;
   border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));
   border-radius:14px;
   background:color-mix(in srgb,var(--accent) 8%,var(--panel));
@@ -463,6 +463,35 @@ input[type="date"]{
   text-align:center;
   font-weight:760;
   font-size:14px;
+}
+
+#photoSection{
+  display:grid;
+  gap:12px;
+}
+
+#tastingPhotoMount{
+  margin-top:0;
+}
+
+.photo-upload-panel{
+  display:grid;
+  gap:0;
+}
+
+.photo-summary-panel{
+  min-height:62px;
+}
+
+.photo-summary-title{
+  margin:0;
+  font-size:16px;
+  line-height:1.2;
+  font-weight:760;
+}
+
+.photo-summary-panel .photo-grid:not(:empty){
+  margin-top:12px;
 }
 
 .photo-input{
@@ -491,37 +520,44 @@ input[type="date"]{
 
 .skip-photo{
   width:100%;
-  min-height:44px;
+  min-height:50px;
   border-radius:14px;
-  padding:0 12px;
+  padding:0 14px;
   background:var(--field);
   border:1px solid var(--line);
   font-weight:720;
   font-size:13px;
-  text-align:center;
+  line-height:1.2;
+  text-align:left;
   display:flex;
   align-items:center;
-  justify-content:center;
-  gap:9px;
+  justify-content:flex-start;
+  gap:10px;
 }
 .skip-photo::before{
   content:"";
-  inline-size:16px;
-  block-size:16px;
-  border-radius:5px;
+  flex:0 0 18px;
+  inline-size:18px;
+  block-size:18px;
+  display:grid;
+  place-items:center;
+  border-radius:6px;
   border:1px solid var(--line-strong);
   background:var(--panel);
+  color:var(--bg);
+  font-size:13px;
+  line-height:1;
+  font-weight:900;
 }
 .skip-photo.active{
   border-color:var(--mint);
   color:var(--mint);
+  background:color-mix(in srgb,var(--mint) 8%,var(--field));
 }
 .skip-photo.active::before{
+  content:"✓";
   border-color:var(--mint);
-  background:
-    linear-gradient(135deg, transparent 42%, var(--mint) 43% 58%, transparent 59%),
-    linear-gradient(45deg, transparent 48%, var(--mint) 49% 62%, transparent 63%),
-    var(--panel);
+  background:var(--mint);
 }
 
 .photo img{
@@ -772,8 +808,9 @@ body.input-focused .bar{
           <div class="field"><label class="label">Лофт мероприятия</label><select class="select" id="tastingLoftSelect"></select></div>
           <div class="field" data-field="tasting.halls"><label class="label">Залы мероприятия</label><div class="selected-line" id="tastingSelectedHalls"></div><div class="hall-list" id="tastingHallList"></div><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
-          <div id="tastingPhotoMount"></div>
         </div>
+
+        <div id="tastingPhotoMount"></div>
       </div>
     </section>
 
@@ -796,7 +833,7 @@ body.input-focused .bar{
 
         <div id="eventPhotoMount">
           <div id="photoSection">
-            <div class="panel">
+            <div class="panel photo-upload-panel">
               <h2 class="section-title">Фотоотчёт</h2>
               <p class="section-note">Добавьте фотографии мероприятия. Они будут отправлены в группу перед текстовым отчётом.</p>
               <div class="photo-actions">
@@ -806,8 +843,8 @@ body.input-focused .bar{
               <input class="photo-input" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
             </div>
 
-            <div class="panel">
-              <h2 class="section-title" id="photoCount">Загружено: 0 из 30</h2>
+            <div class="panel photo-summary-panel">
+              <h2 class="photo-summary-title" id="photoCount">Загружено: 0 из 30</h2>
               <div class="photo-grid" id="photoGrid"></div>
             </div>
           </div>
@@ -1142,6 +1179,8 @@ function renderBoundFields(){
   if (targetPhotoMount && photoSection.parentElement !== targetPhotoMount) {
     targetPhotoMount.appendChild(photoSection);
   }
+  eventPhotoMount.classList.toggle('hidden', state.type !== 'event');
+  tastingPhotoMount.classList.toggle('hidden', state.type !== 'tasting');
   customEventType.classList.toggle('hidden', state.event.eventType !== 'Другое');
   customContactType.classList.add('hidden');
   customFormat.classList.toggle('hidden', !state.event.formats.includes('Другое'));
