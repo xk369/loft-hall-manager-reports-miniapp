@@ -107,7 +107,7 @@ test('formats event report for Telegram', () => {
       '',
       'Фото отправлены выше: 18 шт.',
       '',
-      '#Бешимова #Харзиани #LOFT3'
+      '#Бешимова #Харзиани #LOFT3 #Grace'
     ].join('\n')
   );
 });
@@ -161,7 +161,7 @@ test('formats tasting report', () => {
       '',
       'Фото отправлены выше: 5 шт.',
       '',
-      '#Иванова #Петрова #LOFT3'
+      '#Иванова #Петрова #LOFT3 #Grace #Sky'
     ].join('\n')
   );
 });
@@ -186,7 +186,7 @@ test('builds tasting report with loft and multiple halls', () => {
   assert.match(text, /Лофт: LOFT#2/);
   assert.match(text, /Зал: BACKYARD, Rt’s&Rc’s/);
   assert.match(text, /Дегустация по мероприятию 20\.07\.2026 BACKYARD, Rt’s&Rc’s/);
-  assert.match(text, /#Иванова #Петрова #LOFT2/);
+  assert.match(text, /#Иванова #Петрова #LOFT2 #BACKYARD #RtsRcs/);
 });
 
 test('formats manager hashtags from multiple names', () => {
@@ -194,12 +194,12 @@ test('formats manager hashtags from multiple names', () => {
   payload.event.opManager = 'Осотина/Середа';
   payload.event.orManager = 'Беляченко и Симаненко';
   payload.event.loft = 'LOFT#4';
-  assert.match(formatEventReport(payload, 1), /#Осотина #Середа #Беляченко #Симаненко #LOFT4$/);
+  assert.match(formatEventReport(payload, 1), /#Осотина #Середа #Беляченко #Симаненко #LOFT4 #Grace$/);
 });
 
 test('formats full loft hashtag safely', () => {
   const payload = structuredClone(eventPayload);
-  payload.event.loft = 'LOFT#1 полностью';
+  payload.event.loft = 'LOFT#1';
   payload.event.hall = 'LOFT#1 полностью';
   assert.match(formatEventReport(payload, 1), /Зал: LOFT#1 полностью/);
   assert.match(formatEventReport(payload, 1), /#LOFT1$/);
@@ -208,5 +208,5 @@ test('formats full loft hashtag safely', () => {
 test('formats named venue loft hashtag in title case', () => {
   const payload = structuredClone(eventPayload);
   payload.event.loft = 'Вишневый сад';
-  assert.match(formatEventReport(payload, 1), /#ВишневыйСад$/);
+  assert.match(formatEventReport(payload, 1), /#ВишневыйСад #Grace$/);
 });

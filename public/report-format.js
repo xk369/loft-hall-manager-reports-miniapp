@@ -74,13 +74,14 @@ function managerHashtags(value) {
     .filter(Boolean);
 }
 
-function loftHashtag(value) {
+function placeHashtag(value) {
   const text = cleanText(value).replace(/\s*полностью$/i, '');
   const loftMatch = text.match(/^LOFT#?(\d+(?:[-–]\d+)?)$/i);
   if (loftMatch) return `#LOFT${loftMatch[1].replace(/[-–]/g, '_')}`;
   const token = text
     .replace(/#/g, '')
     .replace(/№/g, '')
+    .replace(/[’']/g, '')
     .split(/[^\p{L}\p{N}_]+/u)
     .filter(Boolean)
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -88,11 +89,36 @@ function loftHashtag(value) {
   return hashtagToken(token);
 }
 
-export function buildReportHashtags({ opManager, orManager, loft } = {}) {
+function splitPlaceValues(value) {
+  if (Array.isArray(value)) return value.flatMap(splitPlaceValues);
+  return cleanText(value)
+    .split(/\s*[,;]\s*/u)
+    .map(cleanText)
+    .filter(Boolean);
+}
+
+function isFullLoftSelection({ loft, hall, halls } = {}) {
+  return [loft, hall, ...splitPlaceValues(halls)]
+    .map(cleanText)
+    .some(value => /\s+полностью$/i.test(value));
+}
+
+function hallHashtags({ hall, halls } = {}) {
+  return splitPlaceValues([hall, halls])
+    .map(placeHashtag)
+    .filter(Boolean);
+}
+
+export function buildReportHashtags({ opManager, orManager, loft, hall, halls } = {}) {
+  const placeTags = [placeHashtag(loft)];
+  if (!isFullLoftSelection({ loft, hall, halls })) {
+    placeTags.push(...hallHashtags({ hall, halls }));
+  }
+
   return uniq([
     ...managerHashtags(opManager),
     ...managerHashtags(orManager),
-    loftHashtag(loft)
+    ...placeTags
   ]).join(' ');
 }
 
@@ -185,7 +211,9 @@ export function formatTastingReport(payload, photoCount = 0) {
   const hashtags = buildReportHashtags({
     opManager: tasting.opManager,
     orManager: tasting.orManager,
-    loft: tasting.loft
+    loft: tasting.loft,
+    hall: eventHall,
+    halls: tasting.halls
   });
   if (hashtags) lines.push('', hashtags);
   return lines.join('\n');
