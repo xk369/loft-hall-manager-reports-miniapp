@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>LOFT HALL · Отчёты менеджеров</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(() => {
+  const telegramScheme = window.Telegram?.WebApp?.colorScheme;
+  const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)')?.matches;
+  document.documentElement.dataset.theme = telegramScheme === 'light' || (!telegramScheme && prefersLight) ? 'light' : 'dark';
+})();
+</script>
 <style>
 :root{
   color-scheme:dark;
@@ -26,7 +33,39 @@
   --success:#22c55e;
   --shadow:0 20px 58px rgba(0,0,0,.28);
   --shadow-soft:0 12px 30px rgba(0,0,0,.18);
+  --bg-wash:rgba(255,255,255,.026);
+  --grid-line:rgba(255,255,255,.018);
+  --progress-track:rgba(255,255,255,.08);
+  --overlay:rgba(5,6,9,.76);
+  --primary-ink:#ffffff;
   --radius:18px;
+}
+
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f4f6fa;
+  --bg-soft:#ffffff;
+  --ink:#111318;
+  --muted:#647084;
+  --muted-2:#8a94a6;
+  --panel:rgba(255,255,255,.94);
+  --panel-2:#ffffff;
+  --field:#f1f3f8;
+  --line:rgba(17,24,39,.10);
+  --line-strong:rgba(17,24,39,.16);
+  --accent:#3f5df6;
+  --accent-soft:rgba(63,93,246,.10);
+  --mint:#12a86c;
+  --danger:#dc354f;
+  --warning:#d97706;
+  --success:#14915b;
+  --shadow:0 20px 54px rgba(28,36,54,.14);
+  --shadow-soft:0 10px 28px rgba(28,36,54,.08);
+  --bg-wash:rgba(63,93,246,.045);
+  --grid-line:rgba(17,24,39,.025);
+  --progress-track:rgba(17,24,39,.10);
+  --overlay:rgba(14,18,28,.42);
+  --primary-ink:#ffffff;
 }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -35,8 +74,8 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.026), transparent 34%),
-    repeating-linear-gradient(90deg, transparent 0 64px, rgba(255,255,255,.018) 64px 65px),
+    linear-gradient(180deg, var(--bg-wash), transparent 34%),
+    repeating-linear-gradient(90deg, transparent 0 64px, var(--grid-line) 64px 65px),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
@@ -94,7 +133,7 @@ textarea{ resize:vertical; min-height:92px; }
 .progress{
   height:3px;
   border-radius:999px;
-  background:rgba(255,255,255,.08);
+  background:var(--progress-track);
   overflow:hidden;
 }
 
@@ -639,7 +678,7 @@ input[type="date"]{
   display:grid;
   place-items:center;
   padding:20px;
-  background:rgba(5,6,9,.76);
+  background:var(--overlay);
   backdrop-filter:blur(18px);
 }
 .sending-card{
@@ -720,7 +759,7 @@ body.input-focused .bar{
 .btn.primary{
   background:var(--accent);
   border-color:var(--accent);
-  color:#fff;
+  color:var(--primary-ink);
   font-size:13px;
 }
 .btn:disabled{ opacity:.55; }
@@ -1120,7 +1159,27 @@ function renderLoftOptions(selectedValue){
   }).join('');
 }
 
+function getPreferredTheme(){
+  if (tg?.colorScheme === 'light') return 'light';
+  if (tg?.colorScheme === 'dark') return 'dark';
+  return window.matchMedia?.('(prefers-color-scheme: light)')?.matches ? 'light' : 'dark';
+}
+
+function syncTheme(){
+  const theme = getPreferredTheme();
+  document.documentElement.dataset.theme = theme;
+
+  try {
+    tg?.setHeaderColor?.(theme === 'light' ? '#f4f6fa' : '#0b0c0f');
+    tg?.setBackgroundColor?.(theme === 'light' ? '#f4f6fa' : '#0b0c0f');
+  } catch {
+    // Telegram clients differ in supported color APIs; CSS theme is already applied.
+  }
+}
+
 function initTelegram(){
+  syncTheme();
+
   if (!initData) {
     access.classList.remove('hidden');
     return;
@@ -1128,7 +1187,6 @@ function initTelegram(){
 
   tg?.ready();
   tg?.expand();
-  if (tg?.colorScheme === 'dark') document.body.classList.add('dark');
 
   fetch('/api/auth/telegram', {
     method:'POST',
@@ -1146,6 +1204,11 @@ function initTelegram(){
       access.querySelector('.section-note').textContent = error.message;
     });
 }
+
+tg?.onEvent?.('themeChanged', syncTheme);
+window.matchMedia?.('(prefers-color-scheme: light)')?.addEventListener?.('change', () => {
+  if (!tg?.colorScheme) syncTheme();
+});
 
 function renderAll(){
   renderSelects();
