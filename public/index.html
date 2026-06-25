@@ -1448,7 +1448,15 @@ function combinedLoftLabels(entries){
 }
 
 function hallLabelsFromEntries(entries){
-  return entries.flatMap(([loft, entry]) => isLoftFullyCovered(loft, entry) ? [loft] : entry.halls);
+  const fullLofts = entries.filter(([loft, entry]) => isLoftFullyCovered(loft, entry)).map(([loft]) => loft);
+  const combineTwoThree = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
+
+  return entries.flatMap(([loft, entry]) => {
+    if (!isLoftFullyCovered(loft, entry)) return entry.halls;
+    if (combineTwoThree && loft === 'LOFT#2') return ['LOFT#2/3'];
+    if (combineTwoThree && loft === 'LOFT#3') return [];
+    return [loft];
+  });
 }
 
 function venueSummary(venue){

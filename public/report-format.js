@@ -119,11 +119,35 @@ function isSelectionEntryFullyCovered(entry = {}) {
   return Boolean(entry.full) || (halls.length === 1 && /^LOFT#?\d+/i.test(cleanText(halls[0])));
 }
 
+function selectionPlaceLabels(selection = {}) {
+  const entries = selectionEntries(selection);
+  if (!entries.length) return [];
+
+  const fullLofts = entries
+    .filter(([, entry]) => isSelectionEntryFullyCovered(entry))
+    .map(([loft]) => loft);
+  const combineTwoThree = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
+
+  return entries.flatMap(([loft, entry]) => {
+    if (!isSelectionEntryFullyCovered(entry)) return entry.halls;
+    if (combineTwoThree && loft === 'LOFT#2') return ['LOFT#2/3'];
+    if (combineTwoThree && loft === 'LOFT#3') return [];
+    return [loft];
+  });
+}
+
 function selectionPlaceHashtags(selection = {}) {
   const entries = selectionEntries(selection);
   if (!entries.length) return [];
 
+  const fullLofts = entries
+    .filter(([, entry]) => isSelectionEntryFullyCovered(entry))
+    .map(([loft]) => loft);
+  const combineTwoThree = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
+
   return entries.flatMap(([loft, entry]) => {
+    if (combineTwoThree && loft === 'LOFT#2') return [placeHashtag('LOFT#2/3')];
+    if (combineTwoThree && loft === 'LOFT#3') return [];
     if (isSelectionEntryFullyCovered(entry)) return [placeHashtag(loft)];
     if (entry.halls.length) return entry.halls.map(placeHashtag);
     return [];
@@ -143,7 +167,7 @@ export function buildReportHashtags({ opManager, orManager, loft, hall, halls, s
 
 export function formatPhotoStatus(photoCount = 0, photosLater = false) {
   if (photosLater) return 'Фото будут отправлены отдельно в группу.';
-  return `Фото отправлены выше: ${photoCount} шт.`;
+  return `Фото будут отправлены ниже: ${photoCount} шт.`;
 }
 
 export function getDepartmentStatusText(entry = {}) {
@@ -170,10 +194,11 @@ export function formatEventReport(payload, photoCount = 0) {
   const event = payload?.event || {};
   const departments = payload?.departments || {};
   const aboutText = buildAboutText(payload?.about);
+  const eventHall = joinList(selectionPlaceLabels(event.selection)) || cleanText(event.hall) || joinList(event.halls);
   const lines = [
     `Дата: ${formatDate(event.date)}`,
     `Лофт: ${cleanText(event.loft)}`,
-    `Зал: ${cleanText(event.hall) || joinList(event.halls)}`,
+    `Зал: ${eventHall}`,
     `Мероприятие: ${cleanText(event.eventName)}`,
     `Тип: ${cleanText(event.eventType)}`,
     `Формат: ${joinList(event.formats)}`,
@@ -209,7 +234,7 @@ export function formatEventReport(payload, photoCount = 0) {
 export function formatTastingReport(payload, photoCount = 0) {
   const tasting = payload?.tasting || {};
   const eventDate = formatDate(tasting.eventDate);
-  const eventHall = cleanText(tasting.eventHall || tasting.hall) || joinList(tasting.halls);
+  const eventHall = joinList(selectionPlaceLabels(tasting.selection)) || cleanText(tasting.eventHall || tasting.hall) || joinList(tasting.halls);
   const eventDescription = eventDate || eventHall
     ? cleanText(`Дегустация по мероприятию ${eventDate} ${eventHall}`)
     : cleanText(tasting.eventName);

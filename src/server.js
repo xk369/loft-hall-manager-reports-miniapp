@@ -105,7 +105,12 @@ app.post('/api/reports', async (request, response) => {
     const telegram = validateRequestInitData(fields.initData);
     const payload = parseReportPayload(fields.reportPayload);
     const photos = validatePhotos(files, payload);
-    normalizeReportText(buildReportText(payload, photos.length));
+    const reportText = normalizeReportText(buildReportText(payload, photos.length));
+    const message = await sendTelegramMessage({
+      botToken: config.botToken,
+      chatId: config.eventReportsChatId,
+      text: reportText
+    });
 
     let photoDelivery = { sentCount: 0, failedBatches: [] };
     if (photos.length > 0) {
@@ -116,12 +121,6 @@ app.post('/api/reports', async (request, response) => {
         continueOnError: true
       });
     }
-    const reportText = normalizeReportText(buildReportText(payload, photoDelivery.sentCount));
-    const message = await sendTelegramMessage({
-      botToken: config.botToken,
-      chatId: config.eventReportsChatId,
-      text: reportText
-    });
 
     console.info(
       JSON.stringify({

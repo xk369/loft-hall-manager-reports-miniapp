@@ -101,7 +101,7 @@ test('formats event report for Telegram', () => {
       '━━━━━━━━━━━━━━━',
       'ФОТООТЧЁТ',
       '',
-      'Фото отправлены выше: 18 шт.',
+      'Фото будут отправлены ниже: 18 шт.',
       '',
       '#Бешимова',
       '#Харзиани',
@@ -157,7 +157,7 @@ test('formats tasting report', () => {
       '━━━━━━━━━━━━━━━',
       'ФОТООТЧЁТ',
       '',
-      'Фото отправлены выше: 5 шт.',
+      'Фото будут отправлены ниже: 5 шт.',
       '',
       '#Иванова',
       '#Петрова',
@@ -219,7 +219,8 @@ test('formats combined full loft 2 and 3 hashtag', () => {
     'LOFT#3': { full: true, halls: [] }
   };
   assert.match(formatEventReport(payload, 1), /Лофт: LOFT#2\/3/);
-  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани\n#LOFT2\n#LOFT3$/);
+  assert.match(formatEventReport(payload, 1), /Зал: LOFT#2\/3/);
+  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани\n#LOFT2_3$/);
 });
 
 test('formats mixed full loft and partial hall hashtags', () => {
