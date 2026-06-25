@@ -412,7 +412,14 @@ input[type="date"]{
   border-radius:10px;
   background:var(--accent-soft);
   color:var(--accent);
-  font-weight:900;
+}
+.hall-select-icon::before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-right:2px solid currentColor;
+  border-bottom:2px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);
 }
 
 .selected-line{
@@ -905,6 +912,36 @@ input[type="date"]{
   display:grid;
   gap:8px;
 }
+.venue-selected-card,
+.venue-custom-card{
+  display:grid;
+  gap:10px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--field);
+  padding:14px;
+}
+.venue-selected-card.active{
+  border-color:color-mix(in srgb,var(--accent) 34%,var(--line));
+  background:color-mix(in srgb,var(--accent) 9%,var(--field));
+}
+.venue-selected-title{
+  margin:0;
+  color:var(--ink);
+  font-size:18px;
+  font-weight:820;
+  line-height:1.18;
+  overflow-wrap:anywhere;
+}
+.venue-selected-subtitle{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.38;
+}
+.venue-custom-input{
+  width:100%;
+}
 .venue-empty{
   margin:0;
   color:var(--muted);
@@ -1032,7 +1069,7 @@ body.input-focused .bar{
         <div class="panel" id="eventFields">
           <h2 class="section-title">Данные мероприятия</h2>
           <div class="field" data-field="event.date"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"><div class="field-error"></div></div>
-          <div class="field" data-field="event.halls"><label class="label">Лофты и залы</label><button class="hall-select" id="eventVenueSelect" type="button" data-venue-open="event"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Выберите площадку или залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="event.halls"><label class="label">Лофты и залы</label><button class="hall-select" id="eventVenueSelect" type="button" data-venue-open="event"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Выберите площадку или залы</span></span><span class="hall-select-icon" aria-hidden="true"></span></button><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventType"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"><div class="field-error"></div></div>
           <div class="field" data-field="event.guestCount"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"><div class="field-error"></div></div>
@@ -1050,7 +1087,7 @@ body.input-focused .bar{
           <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.eventDate"><label class="label">Дата мероприятия</label><input class="input" type="date" data-bind="tasting.eventDate"><div class="field-error"></div></div>
-          <div class="field" data-field="tasting.halls"><label class="label">Лофты и залы мероприятия</label><button class="hall-select" id="tastingVenueSelect" type="button" data-venue-open="tasting"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Выберите площадку или залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.halls"><label class="label">Лофты и залы мероприятия</label><button class="hall-select" id="tastingVenueSelect" type="button" data-venue-open="tasting"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Выберите площадку или залы</span></span><span class="hall-select-icon" aria-hidden="true"></span></button><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
         </div>
 
@@ -1641,7 +1678,7 @@ function renderVenueButton(context){
       <strong>${escapeHtml(copy.title)}</strong>
       <span>${escapeHtml(copy.subtitle)}</span>
     </span>
-    <span class="hall-select-icon">⌄</span>
+    <span class="hall-select-icon" aria-hidden="true"></span>
   `;
 }
 
@@ -1666,12 +1703,29 @@ function renderVenuePicker(){
   ].join('');
 
   if (venue.loft === 'Другое') {
-    venueRoomList.innerHTML = '<p class="venue-empty">Закройте окно и укажите зал вручную в поле формы.</p>';
+    venueRoomList.innerHTML = `
+      <div class="venue-custom-card">
+        <label class="control-label" for="venueCustomInput">Площадка</label>
+        <input
+          class="input venue-custom-input"
+          id="venueCustomInput"
+          data-venue-custom-input
+          placeholder="Введите площадку или зал"
+          value="${escapeHtml(venue.customHall || '')}"
+        >
+        <p class="venue-empty">Название сразу попадет в отчет. Можно указать одну площадку или несколько через запятую.</p>
+      </div>
+    `;
     return;
   }
 
   if (wholeVenue) {
-    venueRoomList.innerHTML = `<p class="venue-empty">${activeEntry.full ? 'Площадка выбрана целиком.' : 'У этой площадки нет отдельных залов. Нажмите на название слева, чтобы выбрать её целиком.'}</p>`;
+    venueRoomList.innerHTML = `
+      <div class="venue-selected-card ${activeEntry.full ? 'active' : ''}">
+        <p class="venue-selected-title">${escapeHtml(currentLoft)}</p>
+        <p class="venue-selected-subtitle">${activeEntry.full ? 'Площадка выбрана для отчета.' : 'У этой площадки нет отдельных залов. Нажмите на название слева, чтобы выбрать ее.'}</p>
+      </div>
+    `;
     return;
   }
 
@@ -2102,6 +2156,13 @@ function closeVenuePicker(){
   document.body.classList.remove('modal-open');
 }
 
+function focusVenueCustomInput(){
+  requestAnimationFrame(() => {
+    const input = venuePicker.querySelector('[data-venue-custom-input]');
+    input?.focus({ preventScroll:true });
+  });
+}
+
 function chooseVenueOther(){
   const venue = getVenue(activeVenueContext);
   venue.loft = 'Другое';
@@ -2114,6 +2175,7 @@ function chooseVenueOther(){
   renderHalls();
   renderTastingHalls();
   renderVenuePicker();
+  focusVenueCustomInput();
 }
 
 function chooseVenueLoft(loft){
@@ -2126,13 +2188,10 @@ function chooseVenueLoft(loft){
   if (WHOLE_VENUES.includes(loft)) {
     const venue = getVenue(activeVenueContext);
     const selection = normalizeVenueSelection(venue);
-    if (selection[loft]?.full) {
-      delete selection[loft];
-    } else {
-      selection[loft] = { full:true, halls:[] };
-    }
-    venue.selection = selection;
+    const isActive = Boolean(selection[loft]?.full) && Object.keys(selection).length === 1;
+    venue.selection = isActive ? {} : { [loft]:{ full:true, halls:[] } };
     venue.loft = '';
+    venue.customHall = '';
     saveVenueAndRender();
     return;
   }
@@ -2143,6 +2202,7 @@ function chooseVenueLoft(loft){
 function toggleVenueRoom(hall){
   const venue = getVenue(activeVenueContext);
   const selection = normalizeVenueSelection(venue);
+  WHOLE_VENUES.forEach(name => delete selection[name]);
   const entry = selection[activeVenueLoft] || { full:false, halls:[] };
   const exists = entry.halls.includes(hall);
   const halls = exists ? entry.halls.filter(item => item !== hall) : [...entry.halls, hall];
@@ -2191,6 +2251,22 @@ venuePicker.addEventListener('click', event => {
   if (room) {
     toggleVenueRoom(room);
   }
+});
+
+venuePicker.addEventListener('input', event => {
+  const input = event.target.closest('[data-venue-custom-input]');
+  if (!input) return;
+
+  const venue = getVenue(activeVenueContext);
+  venue.loft = 'Другое';
+  venue.selection = {};
+  venue.customHall = input.value;
+  venue.halls = splitHallText(input.value);
+  venue.hall = joinList(venue.halls);
+  if (activeVenueContext === 'tasting') venue.eventHall = venue.hall;
+  saveDraft();
+  renderHalls();
+  renderTastingHalls();
 });
 
 document.addEventListener('click', event => {
