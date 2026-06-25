@@ -485,7 +485,7 @@ input[type="date"]{
 }
 
 .status-row.has-na{
-  grid-template-columns:repeat(4, minmax(0,1fr));
+  grid-template-columns:repeat(2, minmax(0,1fr));
 }
 
 .status-btn{
@@ -498,6 +498,8 @@ input[type="date"]{
   font-weight:720;
   line-height:1.15;
   text-align:center;
+  white-space:normal;
+  overflow-wrap:anywhere;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -903,21 +905,6 @@ input[type="date"]{
   display:grid;
   gap:8px;
 }
-.venue-full-btn{
-  width:100%;
-  min-height:48px;
-  margin-bottom:10px;
-  border-radius:15px;
-  border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));
-  background:color-mix(in srgb,var(--accent) 8%,var(--panel));
-  color:var(--accent);
-  font-weight:800;
-}
-.venue-full-btn.active{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:var(--primary-ink);
-}
 .venue-empty{
   margin:0;
   color:var(--muted);
@@ -990,10 +977,6 @@ body.input-focused .bar{
 
 .hidden{ display:none !important; }
 
-@media (max-width:430px){
-  .status-row.has-na{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-}
-
 @media (max-width:370px){
   .choice-grid{ grid-template-columns:1fr; }
   .status-row{ grid-template-columns:repeat(3, minmax(0,1fr)); }
@@ -1049,7 +1032,7 @@ body.input-focused .bar{
         <div class="panel" id="eventFields">
           <h2 class="section-title">Данные мероприятия</h2>
           <div class="field" data-field="event.date"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"><div class="field-error"></div></div>
-          <div class="field" data-field="event.halls"><label class="label">Лофты и залы</label><button class="hall-select" id="eventVenueSelect" type="button" data-venue-open="event"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Лофт полностью или отдельные залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="event.halls"><label class="label">Лофты и залы</label><button class="hall-select" id="eventVenueSelect" type="button" data-venue-open="event"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Выберите площадку или залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventType"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"><div class="field-error"></div></div>
           <div class="field" data-field="event.guestCount"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"><div class="field-error"></div></div>
@@ -1067,7 +1050,7 @@ body.input-focused .bar{
           <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.eventDate"><label class="label">Дата мероприятия</label><input class="input" type="date" data-bind="tasting.eventDate"><div class="field-error"></div></div>
-          <div class="field" data-field="tasting.halls"><label class="label">Лофты и залы мероприятия</label><button class="hall-select" id="tastingVenueSelect" type="button" data-venue-open="tasting"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Лофт полностью или отдельные залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.halls"><label class="label">Лофты и залы мероприятия</label><button class="hall-select" id="tastingVenueSelect" type="button" data-venue-open="tasting"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Выберите площадку или залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
         </div>
 
@@ -1144,7 +1127,7 @@ body.input-focused .bar{
     <div class="venue-picker-head">
       <div>
         <p class="venue-picker-title" id="venuePickerTitle">Выберите площадки</p>
-        <p class="venue-picker-subtitle">Отметьте лофт полностью или выберите отдельные залы.</p>
+        <p class="venue-picker-subtitle">Выберите площадку или отметьте нужные залы.</p>
       </div>
       <button class="venue-picker-close" type="button" data-venue-close aria-label="Закрыть выбор площадок">×</button>
     </div>
@@ -1225,17 +1208,22 @@ const MAX_PHOTOS = 30;
 const EVENT_STEPS = [0,1,2,5];
 const TASTING_STEPS = [0,1,5];
 const FULL_LOFTS = ['LOFT#1','LOFT#2','LOFT#3','LOFT#4','LOFT#8','LOFT#10'];
+const WHOLE_VENUES = ['Метелица','ZORKA','LUDWIG','Кейтеринг'];
 
 const lofts = {
   'LOFT#1':['AVANTAGE','CHATEAU','LOSK','ROYAL BLANC'],
-  'LOFT#2':['BACKYARD',"Rt’s&Rc’s"],
-  'LOFT#3':['BLADE','GRACE','GREENWICH','HOOKS','LOFT ANGELES','MONTBLANC HALL','OUTLOFT','RATUSHA HALL','SECRET','SKY','TOWN','WOOD'],
-  'LOFT#4':['ANDY','BANKSY HALL','CINDY','ITTEN HALL','LONG HALL','MONDRIAN HALL','VILLA MR. PINKY'],
+  'LOFT#2':["Rt’s&Rc’s",'BACKYARD'],
+  'LOFT#3':['RATUSHA HALL','MONTBLANC HALL','BLADE','SKY','GREENWICH','GRACE'],
+  'LOFT#4':['ANDY & CINDY','LONG & ITTEN','MONDRIAN HALL','BANKSY & MORRISON','MORRISON','VILLA MR. PINKY'],
   'LOFT#5':['CONTRABANDA','SMALL'],
   'LOFT#8':['AXIOMA HALL','BROOK HALL','CRYSTALL HALL','MAIN HALL','MILINIS HALL','ROSEWOOD HALL','VECTOR HALL','WELCOME HALL'],
   'LOFT#10':['MAIN HALL','WELCOME HALL'],
   'The Birch':['AMBERWOOD HOUSE','BLACKWOOD HOUSE','MAHOGANY TERRACE','MANGO HOUSE','THE FIELD'],
   'Вишневый сад':['CHEKHOV HALL','LEVITAN HALL'],
+  'Метелица':[],
+  'ZORKA':[],
+  'LUDWIG':[],
+  'Кейтеринг':[],
   'Другое':[]
 };
 
@@ -1257,8 +1245,8 @@ const formats = ['Банкет','Фуршет','Кофе-брейк','Выезд
 const contactTypes = ['Организатор','Заказчик','Координатор'];
 const statusOptions = [
   ['ok','Без замечаний'],
-  ['warning','Незначительные'],
-  ['critical','Значительные'],
+  ['warning','Есть замечания'],
+  ['critical','Критично'],
   ['na','Не заказывали']
 ];
 const departmentHints = {
@@ -1400,9 +1388,13 @@ function selectionEntries(venue){
     .map(loft => [loft, selection[loft]]);
 }
 
+function isLoftFullyCovered(loft, entry){
+  return Boolean(entry.full) || ((lofts[loft] || []).length > 0 && entry.halls.length === (lofts[loft] || []).length);
+}
+
 function combinedLoftLabels(entries){
   const selectedLofts = entries.map(([loft]) => loft);
-  const fullLofts = entries.filter(([, entry]) => entry.full).map(([loft]) => loft);
+  const fullLofts = entries.filter(([loft, entry]) => isLoftFullyCovered(loft, entry)).map(([loft]) => loft);
   const combineTwoThree = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
   const labels = [];
 
@@ -1419,7 +1411,7 @@ function combinedLoftLabels(entries){
 }
 
 function hallLabelsFromEntries(entries){
-  return entries.flatMap(([loft, entry]) => entry.full ? [fullLoftLabel(loft)] : entry.halls);
+  return entries.flatMap(([loft, entry]) => entry.full ? [loft] : entry.halls);
 }
 
 function venueSummary(venue){
@@ -1453,7 +1445,7 @@ function venueButtonCopy(venue){
   if (!entries.length) {
     return {
       title:'Выбрать площадки',
-      subtitle:'Лофт полностью или отдельные залы'
+      subtitle:'Выберите площадку или залы'
     };
   }
 
@@ -1658,6 +1650,8 @@ function renderVenuePicker(){
   const selection = normalizeVenueSelection(venue);
   const currentLoft = orderedLofts().includes(activeVenueLoft) ? activeVenueLoft : orderedLofts()[0];
   const activeEntry = selection[currentLoft] || { full:false, halls:[] };
+  const currentHalls = [...(lofts[currentLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
+  const wholeVenue = WHOLE_VENUES.includes(currentLoft) || currentHalls.length === 0;
   const title = activeVenueContext === 'tasting' ? 'Площадки мероприятия' : 'Площадки мероприятия';
 
   venuePickerTitle.textContent = title;
@@ -1676,15 +1670,15 @@ function renderVenuePicker(){
     return;
   }
 
-  const halls = [...(lofts[currentLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
-  const fullActive = Boolean(activeEntry.full);
+  if (wholeVenue) {
+    venueRoomList.innerHTML = `<p class="venue-empty">${activeEntry.full ? 'Площадка выбрана целиком.' : 'У этой площадки нет отдельных залов. Нажмите на название слева, чтобы выбрать её целиком.'}</p>`;
+    return;
+  }
+
   venueRoomList.innerHTML = `
-    <button type="button" class="venue-full-btn ${fullActive ? 'active' : ''}" data-venue-full="${escapeHtml(currentLoft)}">
-      ${escapeHtml(fullLoftLabel(currentLoft))}
-    </button>
     <div class="venue-room-list">
-      ${halls.map(hall => {
-        const selected = !fullActive && activeEntry.halls.includes(hall);
+      ${currentHalls.map(hall => {
+        const selected = activeEntry.halls.includes(hall);
         return `<button type="button" class="venue-option ${selected ? 'selected' : ''}" data-venue-room="${escapeHtml(hall)}"><span>${escapeHtml(hall)}</span><span class="venue-check">✓</span></button>`;
       }).join('')}
     </div>
@@ -2128,23 +2122,22 @@ function chooseVenueLoft(loft){
     getVenue(activeVenueContext).loft = '';
     getVenue(activeVenueContext).customHall = '';
   }
-  renderVenuePicker();
-}
 
-function toggleVenueFull(loft){
-  const venue = getVenue(activeVenueContext);
-  const selection = normalizeVenueSelection(venue);
-  const isActive = selection[loft]?.full;
-
-  if (isActive) {
-    delete selection[loft];
-  } else {
-    selection[loft] = { full:true, halls:[] };
+  if (WHOLE_VENUES.includes(loft)) {
+    const venue = getVenue(activeVenueContext);
+    const selection = normalizeVenueSelection(venue);
+    if (selection[loft]?.full) {
+      delete selection[loft];
+    } else {
+      selection[loft] = { full:true, halls:[] };
+    }
+    venue.selection = selection;
+    venue.loft = '';
+    saveVenueAndRender();
+    return;
   }
 
-  venue.selection = selection;
-  venue.loft = '';
-  saveVenueAndRender();
+  renderVenuePicker();
 }
 
 function toggleVenueRoom(hall){
@@ -2153,11 +2146,8 @@ function toggleVenueRoom(hall){
   const entry = selection[activeVenueLoft] || { full:false, halls:[] };
   const exists = entry.halls.includes(hall);
   const halls = exists ? entry.halls.filter(item => item !== hall) : [...entry.halls, hall];
-  const allLoftHallsSelected = FULL_LOFTS.includes(activeVenueLoft) && halls.length === (lofts[activeVenueLoft] || []).length;
 
-  if (allLoftHallsSelected) {
-    selection[activeVenueLoft] = { full:true, halls:[] };
-  } else if (halls.length) {
+  if (halls.length) {
     selection[activeVenueLoft] = { full:false, halls };
   } else {
     delete selection[activeVenueLoft];
@@ -2195,11 +2185,6 @@ venuePicker.addEventListener('click', event => {
   const loft = event.target.closest('[data-venue-loft]')?.dataset.venueLoft;
   if (loft) {
     chooseVenueLoft(loft);
-    return;
-  }
-  const fullLoft = event.target.closest('[data-venue-full]')?.dataset.venueFull;
-  if (fullLoft) {
-    toggleVenueFull(fullLoft);
     return;
   }
   const room = event.target.closest('[data-venue-room]')?.dataset.venueRoom;

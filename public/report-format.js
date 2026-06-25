@@ -13,8 +13,8 @@ export const ALL_DEPARTMENTS = [...REQUIRED_DEPARTMENTS, ...OPTIONAL_DEPARTMENTS
 
 export const STATUS_LABELS = {
   ok: '🟢 Без замечаний.',
-  warning: '🟡 Незначительные замечания.',
-  critical: '🔴 Значительные замечания.',
+  warning: '🟡 Есть замечания.',
+  critical: '🔴 Критично.',
   na: 'Не заказывали.'
 };
 
@@ -96,14 +96,13 @@ function splitPlaceValues(value) {
     .filter(Boolean);
 }
 
-function isFullLoftSelection({ loft, hall, halls } = {}) {
-  return [loft, hall, ...splitPlaceValues(halls)]
-    .map(cleanText)
-    .some(value => /\s+полностью$/i.test(value));
+function isLoftPlace(value) {
+  return /^LOFT#?\d+(?:[-–/]\d+)?(?:\s+полностью)?$/i.test(cleanText(value));
 }
 
 function hallHashtags({ hall, halls } = {}) {
   return splitPlaceValues([hall, halls])
+    .filter(value => !isLoftPlace(value))
     .map(placeHashtag)
     .filter(Boolean);
 }
@@ -124,36 +123,22 @@ function selectionPlaceHashtags(selection = {}) {
   const entries = selectionEntries(selection);
   if (!entries.length) return [];
 
-  const fullLofts = entries.filter(([, entry]) => entry.full).map(([loft]) => loft);
-  const partialEntries = entries.filter(([, entry]) => !entry.full);
-  const placeTags = [];
-  const hasFullLoft2And3 = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
-
-  if (hasFullLoft2And3) placeTags.push(placeHashtag('LOFT#2/3'));
-  fullLofts
-    .filter(loft => !(hasFullLoft2And3 && (loft === 'LOFT#2' || loft === 'LOFT#3')))
-    .forEach(loft => placeTags.push(placeHashtag(loft)));
-
-  partialEntries.forEach(([loft, entry]) => {
-    if (!fullLofts.length) placeTags.push(placeHashtag(loft));
-    entry.halls.forEach(hall => placeTags.push(placeHashtag(hall)));
+  return entries.flatMap(([loft, entry]) => {
+    if (entry.halls.length) return entry.halls.map(placeHashtag);
+    if (entry.full && !isLoftPlace(loft)) return [placeHashtag(loft)];
+    return [];
   });
-
-  return placeTags;
 }
 
 export function buildReportHashtags({ opManager, orManager, loft, hall, halls, selection } = {}) {
   const hasSelection = selectionEntries(selection).length > 0;
-  const placeTags = hasSelection ? selectionPlaceHashtags(selection) : [placeHashtag(loft)];
-  if (!hasSelection && !isFullLoftSelection({ loft, hall, halls })) {
-    placeTags.push(...hallHashtags({ hall, halls }));
-  }
+  const placeTags = hasSelection ? selectionPlaceHashtags(selection) : hallHashtags({ hall, halls });
 
   return uniq([
     ...managerHashtags(opManager),
     ...managerHashtags(orManager),
     ...placeTags
-  ]).join(' ');
+  ]).join('\n');
 }
 
 export function formatPhotoStatus(photoCount = 0, photosLater = false) {
