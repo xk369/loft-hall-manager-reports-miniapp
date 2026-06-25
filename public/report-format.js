@@ -76,8 +76,8 @@ function managerHashtags(value) {
 
 function placeHashtag(value) {
   const text = cleanText(value).replace(/\s*полностью$/i, '');
-  const loftMatch = text.match(/^LOFT#?(\d+(?:[-–]\d+)?)$/i);
-  if (loftMatch) return `#LOFT${loftMatch[1].replace(/[-–]/g, '_')}`;
+  const loftMatch = text.match(/^LOFT#?(\d+(?:[-–/]\d+)?)$/i);
+  if (loftMatch) return `#LOFT${loftMatch[1].replace(/[-–/]/g, '_')}`;
   const token = text
     .replace(/#/g, '')
     .replace(/№/g, '')
@@ -109,9 +109,44 @@ function hallHashtags({ hall, halls } = {}) {
     .filter(Boolean);
 }
 
-export function buildReportHashtags({ opManager, orManager, loft, hall, halls } = {}) {
-  const placeTags = [placeHashtag(loft)];
-  if (!isFullLoftSelection({ loft, hall, halls })) {
+function selectionEntries(selection = {}) {
+  return Object.entries(selection || {})
+    .map(([loft, entry]) => [
+      cleanText(loft),
+      {
+        full: Boolean(entry?.full),
+        halls: splitPlaceValues(entry?.halls)
+      }
+    ])
+    .filter(([loft, entry]) => loft && (entry.full || entry.halls.length));
+}
+
+function selectionPlaceHashtags(selection = {}) {
+  const entries = selectionEntries(selection);
+  if (!entries.length) return [];
+
+  const fullLofts = entries.filter(([, entry]) => entry.full).map(([loft]) => loft);
+  const partialEntries = entries.filter(([, entry]) => !entry.full);
+  const placeTags = [];
+  const hasFullLoft2And3 = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
+
+  if (hasFullLoft2And3) placeTags.push(placeHashtag('LOFT#2/3'));
+  fullLofts
+    .filter(loft => !(hasFullLoft2And3 && (loft === 'LOFT#2' || loft === 'LOFT#3')))
+    .forEach(loft => placeTags.push(placeHashtag(loft)));
+
+  partialEntries.forEach(([loft, entry]) => {
+    if (!fullLofts.length) placeTags.push(placeHashtag(loft));
+    entry.halls.forEach(hall => placeTags.push(placeHashtag(hall)));
+  });
+
+  return placeTags;
+}
+
+export function buildReportHashtags({ opManager, orManager, loft, hall, halls, selection } = {}) {
+  const hasSelection = selectionEntries(selection).length > 0;
+  const placeTags = hasSelection ? selectionPlaceHashtags(selection) : [placeHashtag(loft)];
+  if (!hasSelection && !isFullLoftSelection({ loft, hall, halls })) {
     placeTags.push(...hallHashtags({ hall, halls }));
   }
 
@@ -213,7 +248,8 @@ export function formatTastingReport(payload, photoCount = 0) {
     orManager: tasting.orManager,
     loft: tasting.loft,
     hall: eventHall,
-    halls: tasting.halls
+    halls: tasting.halls,
+    selection: tasting.selection
   });
   if (hashtags) lines.push('', hashtags);
   return lines.join('\n');

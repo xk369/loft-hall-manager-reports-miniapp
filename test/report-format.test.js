@@ -205,6 +205,31 @@ test('formats full loft hashtag safely', () => {
   assert.match(formatEventReport(payload, 1), /#LOFT1$/);
 });
 
+test('formats combined full loft 2 and 3 hashtag', () => {
+  const payload = structuredClone(eventPayload);
+  payload.event.loft = 'LOFT#2/3';
+  payload.event.hall = 'LOFT#2 полностью, LOFT#3 полностью';
+  payload.event.halls = ['LOFT#2 полностью', 'LOFT#3 полностью'];
+  payload.event.selection = {
+    'LOFT#2': { full: true, halls: [] },
+    'LOFT#3': { full: true, halls: [] }
+  };
+  assert.match(formatEventReport(payload, 1), /Лофт: LOFT#2\/3/);
+  assert.match(formatEventReport(payload, 1), /#Бешимова #Харзиани #LOFT2_3$/);
+});
+
+test('formats mixed full loft and partial hall hashtags', () => {
+  const payload = structuredClone(eventPayload);
+  payload.event.loft = 'LOFT#3, LOFT#2';
+  payload.event.hall = 'LOFT#3 полностью, BACKYARD';
+  payload.event.halls = ['LOFT#3 полностью', 'BACKYARD'];
+  payload.event.selection = {
+    'LOFT#3': { full: true, halls: [] },
+    'LOFT#2': { full: false, halls: ['BACKYARD'] }
+  };
+  assert.match(formatEventReport(payload, 1), /#Бешимова #Харзиани #LOFT3 #BACKYARD$/);
+});
+
 test('formats named venue loft hashtag in title case', () => {
   const payload = structuredClone(eventPayload);
   payload.event.loft = 'Вишневый сад';

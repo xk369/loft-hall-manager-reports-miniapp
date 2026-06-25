@@ -84,6 +84,10 @@ body{
   -webkit-text-size-adjust:100%;
 }
 
+body.modal-open{
+  overflow:hidden;
+}
+
 button,input,select,textarea{ font:inherit; touch-action:manipulation; }
 button{ border:0; color:inherit; }
 textarea{ resize:vertical; min-height:92px; }
@@ -305,6 +309,7 @@ input[type="date"]{
 .field.is-invalid .select,
 .field.is-invalid .textarea,
 .field.is-invalid .hall-list,
+.field.is-invalid .hall-select,
 .field.is-invalid .chips{
   border-color:var(--danger);
   box-shadow:0 0 0 3px color-mix(in srgb,var(--danger) 16%,transparent);
@@ -364,6 +369,50 @@ input[type="date"]{
 .hall-btn.active{
   border-color:var(--accent);
   color:var(--accent);
+}
+
+.hall-select{
+  width:100%;
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border:1px solid var(--line);
+  background:var(--field);
+  border-radius:16px;
+  padding:14px 14px 14px 15px;
+  text-align:left;
+  color:var(--ink);
+  cursor:pointer;
+  transition:border-color 180ms ease, box-shadow 180ms ease, transform 160ms ease;
+}
+.hall-select:active{ transform:scale(.99); }
+.hall-select-value{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.hall-select-value strong{
+  font-size:15px;
+  line-height:1.28;
+  overflow-wrap:anywhere;
+}
+.hall-select-value span{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.3;
+}
+.hall-select-icon{
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-weight:900;
 }
 
 .selected-line{
@@ -716,6 +765,181 @@ input[type="date"]{
   transition:width 180ms ease;
 }
 
+.venue-picker{
+  position:fixed;
+  inset:0;
+  z-index:70;
+  display:grid;
+  place-items:end center;
+  padding:18px 14px max(18px, env(safe-area-inset-bottom));
+  background:var(--overlay);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  animation:venuePickerFade 180ms ease;
+}
+.venue-picker-panel{
+  width:min(100%,720px);
+  max-height:min(84dvh,760px);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:var(--panel);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  animation:venuePickerIn 240ms cubic-bezier(.2,.8,.2,1);
+}
+.venue-picker-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--line);
+}
+.venue-picker-title{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  line-height:1.2;
+}
+.venue-picker-subtitle{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.4;
+}
+.venue-picker-close{
+  flex:0 0 40px;
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  background:var(--field);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:22px;
+  cursor:pointer;
+}
+.venue-picker-body{
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(116px,.9fr) minmax(0,1.15fr);
+}
+.venue-picker-column{
+  min-height:0;
+  overflow:auto;
+  padding:14px;
+  scrollbar-width:thin;
+}
+.venue-picker-column:first-child{
+  border-right:1px solid var(--line);
+  background:color-mix(in srgb,var(--accent) 3%,transparent);
+}
+.venue-picker-kicker{
+  margin:0 0 10px 2px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.venue-option{
+  width:100%;
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:8px;
+  padding:11px 12px;
+  border:1px solid transparent;
+  border-radius:15px;
+  background:transparent;
+  color:var(--ink);
+  text-align:left;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.25;
+  cursor:pointer;
+  min-width:0;
+  transition:background 180ms ease, border-color 180ms ease, transform 160ms ease;
+}
+.venue-option:first-of-type{ margin-top:0; }
+.venue-option:active{ transform:scale(.985); }
+.venue-option > span:first-child{
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.venue-option.selected{
+  background:var(--accent-soft);
+  border-color:color-mix(in srgb,var(--accent) 32%,var(--line));
+  color:var(--accent);
+}
+.venue-option.active:not(.selected){
+  background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-color:color-mix(in srgb,var(--accent) 20%,var(--line));
+}
+.venue-check{
+  opacity:0;
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:var(--accent);
+  color:var(--primary-ink);
+  font-size:11px;
+  transition:opacity 180ms ease, transform 180ms ease;
+  transform:scale(.75);
+}
+.venue-option.selected .venue-check{
+  opacity:1;
+  transform:scale(1);
+}
+.venue-room-list{
+  display:grid;
+  gap:8px;
+}
+.venue-full-btn{
+  width:100%;
+  min-height:48px;
+  margin-bottom:10px;
+  border-radius:15px;
+  border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));
+  background:color-mix(in srgb,var(--accent) 8%,var(--panel));
+  color:var(--accent);
+  font-weight:800;
+}
+.venue-full-btn.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--primary-ink);
+}
+.venue-empty{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+.venue-picker-foot{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:12px 14px max(12px, env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);
+}
+@keyframes venuePickerFade{
+  from{ opacity:0; }
+  to{ opacity:1; }
+}
+@keyframes venuePickerIn{
+  from{ opacity:0; transform:translateY(18px) scale(.98); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+
 .access{
   min-height:100vh;
   min-height:100dvh;
@@ -825,8 +1049,7 @@ body.input-focused .bar{
         <div class="panel" id="eventFields">
           <h2 class="section-title">Данные мероприятия</h2>
           <div class="field" data-field="event.date"><label class="label">Дата</label><input class="input" type="date" data-bind="event.date"><div class="field-error"></div></div>
-          <div class="field"><label class="label">Лофт</label><select class="select" id="loftSelect"></select></div>
-          <div class="field" data-field="event.halls"><label class="label">Залы</label><div class="selected-line" id="selectedHalls"></div><div class="hall-list" id="hallList"></div><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="event.halls"><label class="label">Лофты и залы</label><button class="hall-select" id="eventVenueSelect" type="button" data-venue-open="event"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Лофт полностью или отдельные залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="customHall" placeholder="Укажите зал или несколько залов" data-bind="event.customHall"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventType"><label class="label">Тип мероприятия</label><select class="select" data-bind="event.eventType" id="eventType"></select><input class="input hidden" id="customEventType" placeholder="Укажите тип" data-bind="event.customEventType"><div class="field-error"></div></div>
           <div class="field" data-field="event.eventName"><label class="label">Название мероприятия</label><input class="input" data-bind="event.eventName" placeholder="Свадьба Александра и Марины"><div class="field-error"></div></div>
           <div class="field" data-field="event.guestCount"><label class="label">Количество гостей</label><input class="input" type="number" min="1" inputmode="numeric" data-bind="event.guestCount"><div class="field-error"></div></div>
@@ -844,8 +1067,7 @@ body.input-focused .bar{
           <div class="field" data-field="tasting.opManager"><label class="label">ОП</label><input class="input" data-bind="tasting.opManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.orManager"><label class="label">ОР</label><input class="input" data-bind="tasting.orManager"><div class="field-error"></div></div>
           <div class="field" data-field="tasting.eventDate"><label class="label">Дата мероприятия</label><input class="input" type="date" data-bind="tasting.eventDate"><div class="field-error"></div></div>
-          <div class="field"><label class="label">Лофт мероприятия</label><select class="select" id="tastingLoftSelect"></select></div>
-          <div class="field" data-field="tasting.halls"><label class="label">Залы мероприятия</label><div class="selected-line" id="tastingSelectedHalls"></div><div class="hall-list" id="tastingHallList"></div><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
+          <div class="field" data-field="tasting.halls"><label class="label">Лофты и залы мероприятия</label><button class="hall-select" id="tastingVenueSelect" type="button" data-venue-open="tasting"><span class="hall-select-value"><strong>Выбрать площадки</strong><span>Лофт полностью или отдельные залы</span></span><span class="hall-select-icon">⌄</span></button><input class="input hidden" id="tastingCustomHall" placeholder="Укажите зал или несколько залов" data-bind="tasting.customHall"><div class="field-error"></div></div>
           <div class="field"><label class="label">Комментарии</label><textarea class="textarea" data-bind="tasting.comments"></textarea></div>
         </div>
 
@@ -917,6 +1139,32 @@ body.input-focused .bar{
   </div>
 </div>
 
+<div class="venue-picker hidden" id="venuePicker" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="venuePickerTitle">
+  <div class="venue-picker-panel">
+    <div class="venue-picker-head">
+      <div>
+        <p class="venue-picker-title" id="venuePickerTitle">Выберите площадки</p>
+        <p class="venue-picker-subtitle">Отметьте лофт полностью или выберите отдельные залы.</p>
+      </div>
+      <button class="venue-picker-close" type="button" data-venue-close aria-label="Закрыть выбор площадок">×</button>
+    </div>
+    <div class="venue-picker-body">
+      <div class="venue-picker-column">
+        <p class="venue-picker-kicker">Лофты</p>
+        <div id="venueLoftList"></div>
+      </div>
+      <div class="venue-picker-column" id="venueRoomColumn">
+        <p class="venue-picker-kicker">Залы</p>
+        <div id="venueRoomList"></div>
+      </div>
+    </div>
+    <div class="venue-picker-foot">
+      <button class="btn" type="button" data-venue-clear>Сбросить</button>
+      <button class="btn primary" type="button" data-venue-done>Готово</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import {
   ALL_DEPARTMENTS,
@@ -956,14 +1204,14 @@ const photoPickBtn = document.getElementById('photoPickBtn');
 const photoSection = document.getElementById('photoSection');
 const eventPhotoMount = document.getElementById('eventPhotoMount');
 const tastingPhotoMount = document.getElementById('tastingPhotoMount');
-const loftSelect = document.getElementById('loftSelect');
-const hallList = document.getElementById('hallList');
-const selectedHalls = document.getElementById('selectedHalls');
+const eventVenueSelect = document.getElementById('eventVenueSelect');
 const customHall = document.getElementById('customHall');
-const tastingLoftSelect = document.getElementById('tastingLoftSelect');
-const tastingHallList = document.getElementById('tastingHallList');
-const tastingSelectedHalls = document.getElementById('tastingSelectedHalls');
+const tastingVenueSelect = document.getElementById('tastingVenueSelect');
 const tastingCustomHall = document.getElementById('tastingCustomHall');
+const venuePicker = document.getElementById('venuePicker');
+const venuePickerTitle = document.getElementById('venuePickerTitle');
+const venueLoftList = document.getElementById('venueLoftList');
+const venueRoomList = document.getElementById('venueRoomList');
 const eventType = document.getElementById('eventType');
 const contactType = document.getElementById('contactType');
 const customEventType = document.getElementById('customEventType');
@@ -1029,7 +1277,9 @@ const departmentHints = {
 const today = new Date().toISOString().slice(0,10);
 let screenIndex = 0;
 let photos = [];
-let state = loadDraft() || createInitialState();
+let state = normalizeState(loadDraft() || createInitialState());
+let activeVenueContext = 'event';
+let activeVenueLoft = 'LOFT#3';
 
 function createInitialState(){
   return {
@@ -1039,6 +1289,7 @@ function createInitialState(){
       loft:'LOFT#3',
       hall:'',
       halls:[],
+      selection:{},
       customHall:'',
       eventType:'',
       customEventType:'',
@@ -1052,7 +1303,7 @@ function createInitialState(){
       contactComment:'',
       serviceStaff:''
     },
-    tasting:{ date:today, opManager:'', orManager:'', eventDate:'', loft:'LOFT#3', halls:[], customHall:'', eventHall:'', eventName:'', hall:'', comments:'' },
+    tasting:{ date:today, opManager:'', orManager:'', eventDate:'', loft:'LOFT#3', halls:[], selection:{}, customHall:'', eventHall:'', eventName:'', hall:'', comments:'' },
     departments:Object.fromEntries(ALL_DEPARTMENTS.map(name => [name,{ status: OPTIONAL_DEPARTMENTS.includes(name) ? 'na' : '', comment:'' }])),
     about:{ summary:'', communication:'', eventFlow:'', feedback:'', leftovers:'', futureNotes:'' },
     photosLater:false
@@ -1076,6 +1327,151 @@ function loadDraft(){
   } catch {
     return null;
   }
+}
+
+function splitHallText(value){
+  return cleanText(value)
+    .split(/\s*[,;]\s*/u)
+    .map(cleanText)
+    .filter(Boolean);
+}
+
+function normalizeSelectionEntry(entry){
+  return {
+    full:Boolean(entry?.full),
+    halls:Array.isArray(entry?.halls) ? entry.halls.map(cleanText).filter(Boolean) : []
+  };
+}
+
+function normalizeVenueSelection(venue = {}){
+  const normalized = {};
+  const source = venue.selection && typeof venue.selection === 'object' ? venue.selection : {};
+
+  Object.entries(source).forEach(([loft, entry]) => {
+    const name = cleanText(loft);
+    if (!name || name === 'Другое' || !lofts[name]) return;
+    const next = normalizeSelectionEntry(entry);
+    next.halls = next.halls.filter(hall => (lofts[name] || []).includes(hall));
+    if (next.full || next.halls.length) normalized[name] = next;
+  });
+
+  if (Object.keys(normalized).length) return normalized;
+
+  const baseLoft = getBaseLoft(venue.loft || 'LOFT#3');
+  if (baseLoft === 'Другое') return normalized;
+  if (!lofts[baseLoft]) return normalized;
+
+  const legacyHalls = Array.isArray(venue.halls) && venue.halls.length
+    ? venue.halls
+    : splitHallText(venue.hall);
+  const hasFull = isFullLoft(venue.loft) || legacyHalls.some(hall => cleanText(hall) === fullLoftLabel(baseLoft));
+
+  if (hasFull) {
+    normalized[baseLoft] = { full:true, halls:[] };
+    return normalized;
+  }
+
+  const halls = legacyHalls.map(cleanText).filter(hall => (lofts[baseLoft] || []).includes(hall));
+  if (halls.length) normalized[baseLoft] = { full:false, halls };
+  return normalized;
+}
+
+function normalizeState(draft){
+  draft.event.selection = normalizeVenueSelection(draft.event);
+  draft.tasting.selection = normalizeVenueSelection(draft.tasting);
+  return draft;
+}
+
+function getVenue(context){
+  return context === 'tasting' ? state.tasting : state.event;
+}
+
+function setVenueSelection(context, selection){
+  getVenue(context).selection = normalizeVenueSelection({ selection });
+}
+
+function orderedLofts(){
+  return Object.keys(lofts).filter(name => name !== 'Другое');
+}
+
+function selectionEntries(venue){
+  const selection = normalizeVenueSelection(venue);
+  return orderedLofts()
+    .filter(loft => selection[loft]?.full || selection[loft]?.halls?.length)
+    .map(loft => [loft, selection[loft]]);
+}
+
+function combinedLoftLabels(entries){
+  const selectedLofts = entries.map(([loft]) => loft);
+  const fullLofts = entries.filter(([, entry]) => entry.full).map(([loft]) => loft);
+  const combineTwoThree = fullLofts.includes('LOFT#2') && fullLofts.includes('LOFT#3');
+  const labels = [];
+
+  selectedLofts.forEach(loft => {
+    if (combineTwoThree && loft === 'LOFT#2') {
+      labels.push('LOFT#2/3');
+      return;
+    }
+    if (combineTwoThree && loft === 'LOFT#3') return;
+    labels.push(loft);
+  });
+
+  return labels;
+}
+
+function hallLabelsFromEntries(entries){
+  return entries.flatMap(([loft, entry]) => entry.full ? [fullLoftLabel(loft)] : entry.halls);
+}
+
+function venueSummary(venue){
+  if (venue.loft === 'Другое') {
+    const customHalls = splitHallText(venue.customHall);
+    return {
+      loftLabel:'Другое',
+      hallLabels:customHalls,
+      selection:{}
+    };
+  }
+
+  const entries = selectionEntries(venue);
+  return {
+    loftLabel:joinList(combinedLoftLabels(entries)),
+    hallLabels:hallLabelsFromEntries(entries),
+    selection:Object.fromEntries(entries)
+  };
+}
+
+function venueButtonCopy(venue){
+  if (venue.loft === 'Другое') {
+    const custom = cleanText(venue.customHall);
+    return {
+      title:custom || 'Другое',
+      subtitle:custom ? 'Зал указан вручную' : 'Укажите зал вручную'
+    };
+  }
+
+  const entries = selectionEntries(venue);
+  if (!entries.length) {
+    return {
+      title:'Выбрать площадки',
+      subtitle:'Лофт полностью или отдельные залы'
+    };
+  }
+
+  const hallLabels = hallLabelsFromEntries(entries);
+  return {
+    title:hallLabels.join(', '),
+    subtitle:combinedLoftLabels(entries).join(', ')
+  };
+}
+
+function syncLegacyVenueFields(context){
+  const venue = getVenue(context);
+  const summary = venueSummary(venue);
+  venue.loft = summary.loftLabel || venue.loft || 'LOFT#3';
+  venue.halls = summary.hallLabels;
+  venue.hall = joinList(summary.hallLabels);
+  if (context === 'tasting') venue.eventHall = venue.hall;
 }
 
 function saveDraft(){
@@ -1148,17 +1544,6 @@ function escapeHtml(value){
   return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
 }
 
-function renderLoftOptions(selectedValue){
-  return Object.keys(lofts).flatMap(loft => {
-    const options = [`<option value="${escapeHtml(loft)}" ${selectedValue === loft ? 'selected' : ''}>${escapeHtml(loft)}</option>`];
-    if (FULL_LOFTS.includes(loft)) {
-      const fullValue = fullLoftLabel(loft);
-      options.push(`<option value="${escapeHtml(fullValue)}" ${selectedValue === fullValue ? 'selected' : ''}>${escapeHtml(fullValue)}</option>`);
-    }
-    return options;
-  }).join('');
-}
-
 function getPreferredTheme(){
   if (tg?.colorScheme === 'light') return 'light';
   if (tg?.colorScheme === 'dark') return 'dark';
@@ -1223,8 +1608,6 @@ function renderAll(){
 }
 
 function renderSelects(){
-  loftSelect.innerHTML = renderLoftOptions(state.event.loft);
-  tastingLoftSelect.innerHTML = renderLoftOptions(state.tasting.loft);
   eventType.innerHTML = `<option value="">Выберите тип</option>${eventTypes.map(name => `<option ${state.event.eventType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
   contactType.innerHTML = `<option value="">Выберите контакт</option>${contactTypes.map(name => `<option ${state.event.contactType === name ? 'selected' : ''}>${name}</option>`).join('')}`;
 }
@@ -1257,28 +1640,64 @@ function renderTypes(){
   });
 }
 
+function renderVenueButton(context){
+  syncLegacyVenueFields(context);
+  const venue = getVenue(context);
+  const button = context === 'tasting' ? tastingVenueSelect : eventVenueSelect;
+  const copy = venueButtonCopy(venue);
+  button.innerHTML = `
+    <span class="hall-select-value">
+      <strong>${escapeHtml(copy.title)}</strong>
+      <span>${escapeHtml(copy.subtitle)}</span>
+    </span>
+    <span class="hall-select-icon">⌄</span>
+  `;
+}
+
+function renderVenuePicker(){
+  const venue = getVenue(activeVenueContext);
+  const selection = normalizeVenueSelection(venue);
+  const currentLoft = orderedLofts().includes(activeVenueLoft) ? activeVenueLoft : orderedLofts()[0];
+  const activeEntry = selection[currentLoft] || { full:false, halls:[] };
+  const title = activeVenueContext === 'tasting' ? 'Площадки мероприятия' : 'Площадки мероприятия';
+
+  venuePickerTitle.textContent = title;
+  venueLoftList.innerHTML = [
+    ...orderedLofts().map(loft => {
+      const entry = selection[loft] || { full:false, halls:[] };
+      const active = activeVenueLoft === loft;
+      const selected = entry.full || entry.halls.length;
+      return `<button type="button" class="venue-option ${active ? 'active' : ''} ${selected ? 'selected' : ''}" data-venue-loft="${escapeHtml(loft)}"><span>${escapeHtml(loft)}</span><span class="venue-check">✓</span></button>`;
+    }),
+    `<button type="button" class="venue-option ${venue.loft === 'Другое' ? 'selected' : ''}" data-venue-other><span>Другое</span><span class="venue-check">✓</span></button>`
+  ].join('');
+
+  if (venue.loft === 'Другое') {
+    venueRoomList.innerHTML = '<p class="venue-empty">Закройте окно и укажите зал вручную в поле формы.</p>';
+    return;
+  }
+
+  const halls = [...(lofts[currentLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
+  const fullActive = Boolean(activeEntry.full);
+  venueRoomList.innerHTML = `
+    <button type="button" class="venue-full-btn ${fullActive ? 'active' : ''}" data-venue-full="${escapeHtml(currentLoft)}">
+      ${escapeHtml(fullLoftLabel(currentLoft))}
+    </button>
+    <div class="venue-room-list">
+      ${halls.map(hall => {
+        const selected = !fullActive && activeEntry.halls.includes(hall);
+        return `<button type="button" class="venue-option ${selected ? 'selected' : ''}" data-venue-room="${escapeHtml(hall)}"><span>${escapeHtml(hall)}</span><span class="venue-check">✓</span></button>`;
+      }).join('')}
+    </div>
+  `;
+}
+
 function renderHalls(){
-  const baseLoft = getBaseLoft(state.event.loft);
-  const halls = [...(lofts[baseLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
-  const selected = getSelectedHalls();
-  const listHidden = state.event.loft === 'Другое' || isFullLoft(state.event.loft);
-  hallList.classList.toggle('hidden', listHidden);
-  selectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
-  hallList.innerHTML = halls
-    .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
-    .join('');
+  renderVenueButton('event');
 }
 
 function renderTastingHalls(){
-  const baseLoft = getBaseLoft(state.tasting.loft);
-  const halls = [...(lofts[baseLoft] || [])].sort((a,b) => a.localeCompare(b, 'ru'));
-  const selected = getSelectedTastingHalls();
-  const listHidden = state.tasting.loft === 'Другое' || isFullLoft(state.tasting.loft);
-  tastingHallList.classList.toggle('hidden', listHidden);
-  tastingSelectedHalls.innerHTML = selected.map(name => `<span class="selected-pill">${escapeHtml(name)}</span>`).join('');
-  tastingHallList.innerHTML = halls
-    .map(name => `<button class="hall-btn ${selected.includes(name) ? 'active' : ''}" type="button" data-tasting-hall="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
-    .join('');
+  renderVenueButton('tasting');
 }
 
 function renderFormats(){
@@ -1371,37 +1790,25 @@ function getResolvedFormats(){
 }
 
 function getSelectedHalls(){
-  if (isFullLoft(state.event.loft)) return [state.event.loft];
-  if (state.event.loft === 'Другое') {
-    return cleanText(state.event.customHall)
-      .split(',')
-      .map(cleanText)
-      .filter(Boolean);
-  }
-  return Array.isArray(state.event.halls) ? state.event.halls.map(cleanText).filter(Boolean) : [];
+  return venueSummary(state.event).hallLabels;
 }
 
 function getSelectedTastingHalls(){
-  if (isFullLoft(state.tasting.loft)) return [state.tasting.loft];
-  if (state.tasting.loft === 'Другое') {
-    return cleanText(state.tasting.customHall)
-      .split(',')
-      .map(cleanText)
-      .filter(Boolean);
-  }
-  return Array.isArray(state.tasting.halls) ? state.tasting.halls.map(cleanText).filter(Boolean) : [];
+  return venueSummary(state.tasting).hallLabels;
 }
 
 function buildPayload(){
   if (state.type === 'tasting') {
-    const selectedHallsValue = getSelectedTastingHalls();
+    const selectedVenue = venueSummary(state.tasting);
+    const selectedHallsValue = selectedVenue.hallLabels;
     const tastingHallValue = joinList(selectedHallsValue);
     return {
       type:'tasting',
       tasting:{
         ...state.tasting,
-        loft:getBaseLoft(state.tasting.loft),
+        loft:selectedVenue.loftLabel,
         halls:selectedHallsValue,
+        selection:selectedVenue.selection,
         eventHall:tastingHallValue,
         eventName:`Дегустация по мероприятию ${state.tasting.eventDate || ''} ${tastingHallValue}`.trim(),
         hall:tastingHallValue
@@ -1409,14 +1816,16 @@ function buildPayload(){
       photosLater:state.photosLater
     };
   }
-  const selectedHallsValue = getSelectedHalls();
+  const selectedVenue = venueSummary(state.event);
+  const selectedHallsValue = selectedVenue.hallLabels;
   return {
     type:'event',
     photosLater:state.photosLater,
     event:{
       ...state.event,
-      loft:getBaseLoft(state.event.loft),
+      loft:selectedVenue.loftLabel,
       halls:selectedHallsValue,
+      selection:selectedVenue.selection,
       hall:joinList(selectedHallsValue),
       eventType:getResolvedEventType(),
       contactType:getResolvedContactType(),
@@ -1674,50 +2083,135 @@ document.querySelectorAll('[data-report-type]').forEach(button => {
   });
 });
 
-loftSelect.addEventListener('change', () => {
-  state.event.loft = loftSelect.value;
-  state.event.hall = '';
-  state.event.halls = isFullLoft(state.event.loft) ? [state.event.loft] : [];
-  state.event.customHall = '';
+function saveVenueAndRender(){
+  syncLegacyVenueFields(activeVenueContext);
   saveDraft();
   renderBoundFields();
   renderHalls();
-});
+  renderTastingHalls();
+  renderVenuePicker();
+}
 
-tastingLoftSelect.addEventListener('change', () => {
-  state.tasting.loft = tastingLoftSelect.value;
-  state.tasting.hall = '';
-  state.tasting.halls = isFullLoft(state.tasting.loft) ? [state.tasting.loft] : [];
-  state.tasting.eventHall = '';
-  state.tasting.customHall = '';
+function openVenuePicker(context){
+  activeVenueContext = context;
+  const entries = selectionEntries(getVenue(context));
+  activeVenueLoft = entries[0]?.[0] || orderedLofts()[0];
+  renderVenuePicker();
+  venuePicker.classList.remove('hidden');
+  venuePicker.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  tg?.HapticFeedback?.impactOccurred?.('light');
+}
+
+function closeVenuePicker(){
+  venuePicker.classList.add('hidden');
+  venuePicker.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+}
+
+function chooseVenueOther(){
+  const venue = getVenue(activeVenueContext);
+  venue.loft = 'Другое';
+  venue.selection = {};
+  venue.halls = [];
+  venue.hall = '';
+  if (activeVenueContext === 'tasting') venue.eventHall = '';
   saveDraft();
   renderBoundFields();
-  renderTastingHalls();
-});
-
-hallList.addEventListener('click', event => {
-  const button = event.target.closest('[data-hall]');
-  if (!button) return;
-  const hall = button.dataset.hall;
-  state.event.halls = state.event.halls.includes(hall)
-    ? state.event.halls.filter(item => item !== hall)
-    : [...state.event.halls, hall];
-  state.event.hall = joinList(state.event.halls);
-  saveDraft();
   renderHalls();
+  renderTastingHalls();
+  renderVenuePicker();
+}
+
+function chooseVenueLoft(loft){
+  activeVenueLoft = loft;
+  if (getVenue(activeVenueContext).loft === 'Другое') {
+    getVenue(activeVenueContext).loft = '';
+    getVenue(activeVenueContext).customHall = '';
+  }
+  renderVenuePicker();
+}
+
+function toggleVenueFull(loft){
+  const venue = getVenue(activeVenueContext);
+  const selection = normalizeVenueSelection(venue);
+  const isActive = selection[loft]?.full;
+
+  if (isActive) {
+    delete selection[loft];
+  } else {
+    selection[loft] = { full:true, halls:[] };
+  }
+
+  venue.selection = selection;
+  venue.loft = '';
+  saveVenueAndRender();
+}
+
+function toggleVenueRoom(hall){
+  const venue = getVenue(activeVenueContext);
+  const selection = normalizeVenueSelection(venue);
+  const entry = selection[activeVenueLoft] || { full:false, halls:[] };
+  const exists = entry.halls.includes(hall);
+  const halls = exists ? entry.halls.filter(item => item !== hall) : [...entry.halls, hall];
+  const allLoftHallsSelected = FULL_LOFTS.includes(activeVenueLoft) && halls.length === (lofts[activeVenueLoft] || []).length;
+
+  if (allLoftHallsSelected) {
+    selection[activeVenueLoft] = { full:true, halls:[] };
+  } else if (halls.length) {
+    selection[activeVenueLoft] = { full:false, halls };
+  } else {
+    delete selection[activeVenueLoft];
+  }
+
+  venue.selection = selection;
+  venue.loft = '';
+  saveVenueAndRender();
+}
+
+function clearVenueSelection(){
+  const venue = getVenue(activeVenueContext);
+  venue.loft = '';
+  venue.selection = {};
+  venue.halls = [];
+  venue.hall = '';
+  venue.customHall = '';
+  if (activeVenueContext === 'tasting') venue.eventHall = '';
+  saveVenueAndRender();
+}
+
+venuePicker.addEventListener('click', event => {
+  if (event.target === venuePicker || event.target.closest('[data-venue-close]') || event.target.closest('[data-venue-done]')) {
+    closeVenuePicker();
+    return;
+  }
+  if (event.target.closest('[data-venue-clear]')) {
+    clearVenueSelection();
+    return;
+  }
+  if (event.target.closest('[data-venue-other]')) {
+    chooseVenueOther();
+    return;
+  }
+  const loft = event.target.closest('[data-venue-loft]')?.dataset.venueLoft;
+  if (loft) {
+    chooseVenueLoft(loft);
+    return;
+  }
+  const fullLoft = event.target.closest('[data-venue-full]')?.dataset.venueFull;
+  if (fullLoft) {
+    toggleVenueFull(fullLoft);
+    return;
+  }
+  const room = event.target.closest('[data-venue-room]')?.dataset.venueRoom;
+  if (room) {
+    toggleVenueRoom(room);
+  }
 });
 
-tastingHallList.addEventListener('click', event => {
-  const button = event.target.closest('[data-tasting-hall]');
-  if (!button) return;
-  const hall = button.dataset.tastingHall;
-  state.tasting.halls = state.tasting.halls.includes(hall)
-    ? state.tasting.halls.filter(item => item !== hall)
-    : [...state.tasting.halls, hall];
-  state.tasting.hall = joinList(state.tasting.halls);
-  state.tasting.eventHall = state.tasting.hall;
-  saveDraft();
-  renderTastingHalls();
+document.addEventListener('click', event => {
+  const context = event.target.closest('[data-venue-open]')?.dataset.venueOpen;
+  if (context) openVenuePicker(context);
 });
 
 eventType.addEventListener('change', () => { state.event.eventType = eventType.value; saveDraft(); renderBoundFields(); });
@@ -1807,6 +2301,12 @@ nextBtn.addEventListener('click', async () => {
     renderScreen();
   } catch (error) {
     showError(error.message);
+  }
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !venuePicker.classList.contains('hidden')) {
+    closeVenuePicker();
   }
 });
 
