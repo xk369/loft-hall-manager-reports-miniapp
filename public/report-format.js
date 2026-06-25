@@ -96,13 +96,8 @@ function splitPlaceValues(value) {
     .filter(Boolean);
 }
 
-function isLoftPlace(value) {
-  return /^LOFT#?\d+(?:[-–/]\d+)?(?:\s+полностью)?$/i.test(cleanText(value));
-}
-
 function hallHashtags({ hall, halls } = {}) {
   return splitPlaceValues([hall, halls])
-    .filter(value => !isLoftPlace(value))
     .map(placeHashtag)
     .filter(Boolean);
 }
@@ -119,13 +114,18 @@ function selectionEntries(selection = {}) {
     .filter(([loft, entry]) => loft && (entry.full || entry.halls.length));
 }
 
+function isSelectionEntryFullyCovered(entry = {}) {
+  const halls = Array.isArray(entry.halls) ? entry.halls : [];
+  return Boolean(entry.full) || (halls.length === 1 && /^LOFT#?\d+/i.test(cleanText(halls[0])));
+}
+
 function selectionPlaceHashtags(selection = {}) {
   const entries = selectionEntries(selection);
   if (!entries.length) return [];
 
   return entries.flatMap(([loft, entry]) => {
+    if (isSelectionEntryFullyCovered(entry)) return [placeHashtag(loft)];
     if (entry.halls.length) return entry.halls.map(placeHashtag);
-    if (entry.full && !isLoftPlace(loft)) return [placeHashtag(loft)];
     return [];
   });
 }

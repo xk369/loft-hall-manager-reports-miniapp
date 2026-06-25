@@ -167,7 +167,7 @@ test('formats tasting report', () => {
   );
 });
 
-test('builds tasting report with loft and multiple halls', () => {
+test('builds tasting report with fully selected loft', () => {
   const text = buildReportText(
     {
       type: 'tasting',
@@ -177,7 +177,10 @@ test('builds tasting report with loft and multiple halls', () => {
         orManager: 'Петрова',
         eventDate: '2026-07-20',
         loft: 'LOFT#2',
-        halls: ['BACKYARD', "Rt’s&Rc’s"],
+        halls: ['LOFT#2'],
+        selection: {
+          'LOFT#2': { full: true, halls: [] }
+        },
         comments: ''
       }
     },
@@ -185,9 +188,9 @@ test('builds tasting report with loft and multiple halls', () => {
   );
 
   assert.match(text, /Лофт: LOFT#2/);
-  assert.match(text, /Зал: BACKYARD, Rt’s&Rc’s/);
-  assert.match(text, /Дегустация по мероприятию 20\.07\.2026 BACKYARD, Rt’s&Rc’s/);
-  assert.match(text, /#Иванова\n#Петрова\n#BACKYARD\n#RtsRcs/);
+  assert.match(text, /Зал: LOFT#2/);
+  assert.match(text, /Дегустация по мероприятию 20\.07\.2026 LOFT#2/);
+  assert.match(text, /#Иванова\n#Петрова\n#LOFT2/);
 });
 
 test('formats manager hashtags from multiple names', () => {
@@ -203,7 +206,7 @@ test('formats full loft hashtag safely', () => {
   payload.event.loft = 'LOFT#1';
   payload.event.hall = 'LOFT#1 полностью';
   assert.match(formatEventReport(payload, 1), /Зал: LOFT#1 полностью/);
-  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани$/);
+  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани\n#LOFT1$/);
 });
 
 test('formats combined full loft 2 and 3 hashtag', () => {
@@ -216,7 +219,7 @@ test('formats combined full loft 2 and 3 hashtag', () => {
     'LOFT#3': { full: true, halls: [] }
   };
   assert.match(formatEventReport(payload, 1), /Лофт: LOFT#2\/3/);
-  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани$/);
+  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани\n#LOFT2\n#LOFT3$/);
 });
 
 test('formats mixed full loft and partial hall hashtags', () => {
@@ -228,7 +231,20 @@ test('formats mixed full loft and partial hall hashtags', () => {
     'LOFT#3': { full: true, halls: [] },
     'LOFT#2': { full: false, halls: ['BACKYARD'] }
   };
-  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани\n#BACKYARD$/);
+  assert.match(formatEventReport(payload, 1), /#Бешимова\n#Харзиани\n#LOFT3\n#BACKYARD$/);
+});
+
+test('formats collapsed full loft hall in event report', () => {
+  const payload = structuredClone(eventPayload);
+  payload.event.loft = 'LOFT#3';
+  payload.event.hall = 'LOFT#3';
+  payload.event.halls = ['LOFT#3'];
+  payload.event.selection = {
+    'LOFT#3': { full: true, halls: [] }
+  };
+  const text = formatEventReport(payload, 1);
+  assert.match(text, /Зал: LOFT#3/);
+  assert.match(text, /#Бешимова\n#Харзиани\n#LOFT3$/);
 });
 
 test('formats named venue loft hashtag in title case', () => {

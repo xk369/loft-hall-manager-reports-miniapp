@@ -1448,7 +1448,7 @@ function combinedLoftLabels(entries){
 }
 
 function hallLabelsFromEntries(entries){
-  return entries.flatMap(([loft, entry]) => entry.full ? [loft] : entry.halls);
+  return entries.flatMap(([loft, entry]) => isLoftFullyCovered(loft, entry) ? [loft] : entry.halls);
 }
 
 function venueSummary(venue){
@@ -1462,10 +1462,14 @@ function venueSummary(venue){
   }
 
   const entries = selectionEntries(venue);
+  const normalizedEntries = entries.map(([loft, entry]) => [
+    loft,
+    isLoftFullyCovered(loft, entry) ? { full:true, halls:[] } : entry
+  ]);
   return {
     loftLabel:joinList(combinedLoftLabels(entries)),
     hallLabels:hallLabelsFromEntries(entries),
-    selection:Object.fromEntries(entries)
+    selection:Object.fromEntries(normalizedEntries)
   };
 }
 
