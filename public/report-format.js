@@ -5,17 +5,16 @@ export const REQUIRED_DEPARTMENTS = [
   'DEVELOPMENT',
   'SECURITY',
   'MAG',
-  'KITCHEN',
-  'SERVICE'
+  'KITCHEN'
 ];
 
 export const OPTIONAL_DEPARTMENTS = ['BAR', 'HOOKAH'];
 export const ALL_DEPARTMENTS = [...REQUIRED_DEPARTMENTS, ...OPTIONAL_DEPARTMENTS];
 
 export const STATUS_LABELS = {
-  ok: 'Проверено, замечаний нет.',
-  warning: 'Есть замечания.',
-  critical: 'Серьёзные замечания.',
+  ok: '🟢 Без замечаний.',
+  warning: '🟡 Незначительные замечания.',
+  critical: '🔴 Значительные замечания.',
   na: 'Не заказывали.'
 };
 
